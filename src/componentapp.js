@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import moment from 'moment';
 
 import './componentapp.css';
+import DatePicker from './componentdatepicker';
 
 /**
  * App
@@ -11,7 +13,7 @@ export default class App extends Component {
    */
   render() {
     return <div className="container template-app">
-      <h4 className="title is-4">ToDo:</h4>
+      <DatePicker endDate={moment('2000-01-31')} startDate={moment('1990-01-01')}/>
     </div>;
   }
 }

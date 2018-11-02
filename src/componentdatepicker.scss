@@ -1,0 +1,11 @@
+.will-be-selected{
+  background-color: orangered;
+}
+
+.table{
+  .is-selected{
+    &.will-be-selected{
+      background-color: blue;
+    }
+  }
+}
