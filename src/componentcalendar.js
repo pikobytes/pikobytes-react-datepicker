@@ -3,74 +3,24 @@ import PropTypes from 'prop-types';
 
 export default class Calendar extends React.Component {
   static propTypes = {
+    hoverHandler: PropTypes.func,
     month: PropTypes.shape({
       month: PropTypes.number,
       weeks: PropTypes.array,
     }),
+    selectionHandler: PropTypes.func,
+    selectionStart: PropTypes.object, // moment
+    selectionEnd: PropTypes.object, // moment
+    temporaryStart: PropTypes.object, // moment
+    temporaryEnd: PropTypes.object, // moment
   };
 
-  state = {
-    selectionStart: undefined,
-    selectionEnd: undefined,
-    selectionHandler: this.selectionStartHandler,
-    temporaryEnd: undefined,
-  };
-
-  /**
-   * sets the startDate of a selection and changes the selectionHandler to the selectionEndHandler
-   * @param {moment} date which should be selected startDate
-   */
-  selectionStartHandler(date) {
-    const newState = {
-      selectionStart: date,
-      selectionEnd: undefined,
-      selectionHandler: this.selectionEndHandler,
-    };
-
-    if (this.state.selectionEnd === date) {
-      newState.temporaryStart = date;
-    }
-
-    this.setState(newState);
+  // wrappers around the handlers passed in as props to keep the this contexts, while still being able to bind the dates to them later on
+  selectionHandler(date) {
+    this.props.selectionHandler(date);
   }
-
-  /**
-   * sets the endDate of a selection and changes the selectionHandler to the selectionStartHandler
-   * @param {moment} date which should be selected as endDate
-   */
-  selectionEndHandler(date) {
-    const { selectionStart } = this.state;
-
-    const newState = {
-      selectionHandler: this.selectionStartHandler,
-      temporaryEnd: date,
-      temporaryStart: date,
-    };
-
-    if (date.isBefore(selectionStart)) {
-      newState.selectionStart = date;
-      newState.selectionEnd = selectionStart;
-    } else {
-      newState.selectionEnd = date;
-    }
-
-    this.setState(newState);
-  }
-
-  /**
-   * sets the temporary selection, selected through hovering over the calendar or setting a start point and hovering over an endDate
-   * @param date which is currently hovered
-   */
   hoverHandler(date) {
-    const { selectionStart } = this.state;
-
-    if (this.state.selectionHandler === this.selectionStartHandler) {
-      this.setState({ temporaryStart: date, temporaryEnd: date });
-    } else if (date.isBefore(selectionStart)) {
-      this.setState({ temporaryStart: date, temporaryEnd: selectionStart });
-    } else {
-      this.setState({ temporaryStart: selectionStart, temporaryEnd: date });
-    }
+    this.props.hoverHandler(date);
   }
 
   /**
@@ -110,17 +60,17 @@ export default class Calendar extends React.Component {
       </thead>
       <tbody>
         { /* Iterate over the weeks of a monthObject. Generate for each week a row. Then iterate over the days of a week and generate a
-        datacell for every day. */}
+        cell for every day. */}
         {month.weeks.map(week =>
           <tr key={week.week}>{week.days.map(day =>
             <td key={`${day.year()}.${day.month()}.${day.date()}`}
-              className={`${Calendar.determineSelection(day, this.state.selectionEnd, this.state.selectionStart)
+              className={`${Calendar.determineSelection(day, this.props.selectionEnd, this.props.selectionStart)
                 ? 'is-selected'
-                : ''}  ${Calendar.determineSelection(day, this.state.temporaryEnd, this.state.temporaryStart)
+                : ''}  ${Calendar.determineSelection(day, this.props.temporaryEnd, this.props.temporaryStart)
                 ? 'will-be-selected'
                 : ''}`}
 
-              onClick={this.state.selectionHandler.bind(this, day)}
+              onClick={this.selectionHandler.bind(this, day)}
               onMouseOver={this.hoverHandler.bind(this, day)}>
               {day.date() === 1 ? day.format('D. MMM') : day.format('D')}
             </td>)}</tr>)}

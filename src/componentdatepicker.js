@@ -82,6 +82,11 @@ export default class DatePicker extends React.Component {
       month: 0,
       year: 1990,
     },
+    selectionStart: undefined,
+    selectionEnd: undefined,
+    selectionHandler: this.selectionStartHandler,
+    temporaryEnd: undefined,
+    temporaryStart: undefined,
   };
 
   /**
@@ -154,24 +159,113 @@ export default class DatePicker extends React.Component {
 
     this.setState({ calendar: calendar });
   }
+  /**
+   * sets the startDate of a selection and changes the selectionHandler to the selectionEndHandler
+   * @param {moment} date which should be selected startDate
+   */
+  selectionStartHandler(date) {
+    const newState = {
+      selectionStart: date,
+      selectionEnd: undefined,
+      selectionHandler: this.selectionEndHandler,
+    };
 
+    if (this.state.selectionEnd === date) {
+      newState.temporaryStart = date;
+    }
+
+    this.setState(newState);
+  }
+
+  /**
+   * sets the endDate of a selection and changes the selectionHandler to the selectionStartHandler
+   * @param {moment} date which should be selected as endDate
+   */
+  selectionEndHandler(date) {
+    const { selectionStart } = this.state;
+
+    const newState = {
+      selectionHandler: this.selectionStartHandler,
+      temporaryEnd: date,
+      temporaryStart: date,
+    };
+
+    if (date.isBefore(selectionStart)) {
+      newState.selectionStart = date;
+      newState.selectionEnd = selectionStart;
+    } else {
+      newState.selectionEnd = date;
+    }
+
+    this.setState(newState);
+  }
+
+  /**
+   * sets the temporary selection, selected through hovering over the calendar or setting a start point and hovering over an endDate
+   * @param date which is currently hovered
+   */
+  hoverHandler(date) {
+    const { selectionStart } = this.state;
+
+    if (this.state.selectionHandler === this.selectionStartHandler) {
+      this.setState({ temporaryStart: date, temporaryEnd: date });
+    } else if (date.isBefore(selectionStart)) {
+      this.setState({ temporaryStart: date, temporaryEnd: selectionStart });
+    } else {
+      this.setState({ temporaryStart: selectionStart, temporaryEnd: date });
+    }
+  }
 
   render() {
-    const { calendar, displayError, firstCalendar } = this.state;
+    const {
+      calendar,
+      displayError,
+      firstCalendar,
+      selectionStart,
+      selectionEnd,
+      selectionHandler,
+      temporaryEnd,
+      temporaryStart,
+    } = this.state;
+
+    const button = 'button';
 
     return <div>
       {displayError && <p>The date you tried to select is not available.</p>}
-      <a onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: 0, year: 1 }, 'firstCalendar')}> inc year</a>
-      <p>{this.state.firstCalendar.year}</p>
-      <a onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: 0, year: -1 }, 'firstCalendar')}> dec year</a>
-      <a onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: 1, year: 0 }, 'firstCalendar')}> inc month</a>
-      <p>{this.state.firstCalendar.month + 1}</p>
-      <a onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: -1, year: 0 }, 'firstCalendar')}> dec month</a>
+      <a className={button}
+        onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: 0, year: 1 }, 'firstCalendar')}> inc year</a>
+      <p>{firstCalendar.year}</p>
+      <a className={button}
+        onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: 0, year: -1 }, 'firstCalendar')}> dec year</a>
+      <br/>
+      <a className={button}
+        onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: 1, year: 0 }, 'firstCalendar')}> inc month</a>
+      <p>{firstCalendar.month + 1}</p>
+      <a className={button}
+        onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: -1, year: 0 }, 'firstCalendar')}> dec month</a>
 
       {calendar.length > 0
-        ? <Calendar month={calendar
-          .filter(x => x.year === this.state.firstCalendar.year)[0].months
-          .filter(y => y.month === this.state.firstCalendar.month)[0]} />
+        ? <React.Fragment>
+          <Calendar month={calendar
+            .filter(x => x.year === firstCalendar.year)[0].months
+            .filter(y => y.month === firstCalendar.month)[0]}
+          selectionHandler={selectionHandler.bind(this)}
+          hoverHandler={this.hoverHandler.bind(this)}
+          selectionStart={selectionStart}
+          selectionEnd={selectionEnd}
+          temporaryStart={temporaryStart}
+          temporaryEnd={temporaryEnd}/>
+
+          <Calendar month={calendar
+            .filter(x => x.year === firstCalendar.year)[0].months
+            .filter(y => y.month === firstCalendar.month)[0]}
+          selectionHandler={selectionHandler.bind(this)}
+          hoverHandler={this.hoverHandler.bind(this)}
+          selectionStart={selectionStart}
+          selectionEnd={selectionEnd}
+          temporaryStart={temporaryStart}
+          temporaryEnd={temporaryEnd}/>
+        </React.Fragment>
         : 'no cal'}
     </div>;
   }
