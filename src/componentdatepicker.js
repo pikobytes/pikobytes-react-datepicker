@@ -1,7 +1,7 @@
 import React from 'react';
 import moment from 'moment';
 import propTypes from 'prop-types';
-import Calendar from './componentcalendar';
+import CalendarWithNavigation from './componentcalendarwithnavigation';
 import './componentdatepicker.css';
 
 /**
@@ -14,6 +14,7 @@ import './componentdatepicker.css';
 function generateDays(year, month, week) {
   return Array(7).fill(0).map((n, i) => moment()
     .year(year)
+    .month(month)
     .week(week)
     .startOf('week')
     .clone()
@@ -49,7 +50,7 @@ function buildCalendar(year) {
     // the year might start with the 53th week. If that happens, we will just generate this week manually
     if (startWeek === 53) {
       startWeek = 1;
-      weeks.push({ week: 53, days: generateDays(year, 0, 53) });
+      weeks.push({ week: 53, days: generateDays(year - 1, 0, 53) });
     }
     // the week containing january the first is handled as the first week of the next year
     if (endWeek === 1) {
@@ -81,6 +82,10 @@ export default class DatePicker extends React.Component {
     firstCalendar: {
       month: 0,
       year: 1990,
+    },
+    secondCalendar: {
+      month: 2,
+      year: 1995,
     },
     selectionStart: undefined,
     selectionEnd: undefined,
@@ -221,6 +226,7 @@ export default class DatePicker extends React.Component {
       calendar,
       displayError,
       firstCalendar,
+      secondCalendar,
       selectionStart,
       selectionEnd,
       selectionHandler,
@@ -228,43 +234,40 @@ export default class DatePicker extends React.Component {
       temporaryStart,
     } = this.state;
 
-    const button = 'button';
 
     return <div>
       {displayError && <p>The date you tried to select is not available.</p>}
-      <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: 0, year: 1 }, 'firstCalendar')}> inc year</a>
-      <p>{firstCalendar.year}</p>
-      <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: 0, year: -1 }, 'firstCalendar')}> dec year</a>
-      <br/>
-      <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: 1, year: 0 }, 'firstCalendar')}> inc month</a>
-      <p>{firstCalendar.month + 1}</p>
-      <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, firstCalendar, { month: -1, year: 0 }, 'firstCalendar')}> dec month</a>
+
 
       {calendar.length > 0
         ? <React.Fragment>
-          <Calendar month={calendar
-            .filter(x => x.year === firstCalendar.year)[0].months
-            .filter(y => y.month === firstCalendar.month)[0]}
-          selectionHandler={selectionHandler.bind(this)}
-          hoverHandler={this.hoverHandler.bind(this)}
-          selectionStart={selectionStart}
-          selectionEnd={selectionEnd}
-          temporaryStart={temporaryStart}
-          temporaryEnd={temporaryEnd}/>
+          <CalendarWithNavigation
+            hoverHandler={this.hoverHandler.bind(this)}
+            identifier='firstCalendar'
+            month={calendar
+              .filter(x => x.year === firstCalendar.year)[0].months
+              .filter(y => y.month === firstCalendar.month)[0]}
+            monthSelection={firstCalendar}
+            monthSelectionHandler={this.modifyCalendarMonth.bind(this)}
+            selectionHandler={selectionHandler.bind(this)}
+            selectionStart={selectionStart}
+            selectionEnd={selectionEnd}
+            temporaryStart={temporaryStart}
+            temporaryEnd={temporaryEnd}/>
 
-          <Calendar month={calendar
-            .filter(x => x.year === firstCalendar.year)[0].months
-            .filter(y => y.month === firstCalendar.month)[0]}
-          selectionHandler={selectionHandler.bind(this)}
-          hoverHandler={this.hoverHandler.bind(this)}
-          selectionStart={selectionStart}
-          selectionEnd={selectionEnd}
-          temporaryStart={temporaryStart}
-          temporaryEnd={temporaryEnd}/>
+          <CalendarWithNavigation
+            hoverHandler={this.hoverHandler.bind(this)}
+            identifier='secondCalendar'
+            month={calendar
+              .filter(x => x.year === secondCalendar.year)[0].months
+              .filter(y => y.month === secondCalendar.month)[0]}
+            monthSelection={secondCalendar}
+            monthSelectionHandler={this.modifyCalendarMonth.bind(this)}
+            selectionHandler={selectionHandler.bind(this)}
+            selectionStart={selectionStart}
+            selectionEnd={selectionEnd}
+            temporaryStart={temporaryStart}
+            temporaryEnd={temporaryEnd}/>
         </React.Fragment>
         : 'no cal'}
     </div>;
