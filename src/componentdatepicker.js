@@ -16,6 +16,7 @@ function generateDays(year, month, week) {
     .year(year)
     .month(month)
     .week(week)
+    .utc()
     .startOf('week')
     .clone()
     .add(n + (i + 1), 'day'));
@@ -35,11 +36,13 @@ function buildCalendar(year) {
     };
 
     // subtract is needed for the shift from sunday to monday as first day of the week
-    let startWeek = moment().year(year).month(month).startOf('month')
+    let startWeek = moment().year(year).month(month).utc()
+      .startOf('month')
       .subtract(1, 'days')
       .startOf('week')
       .week();
-    let endWeek = moment().year(year).month(month).endOf('month')
+    let endWeek = moment().year(year).month(month).utc()
+      .endOf('month')
       .subtract(1, 'days')
       .startOf('week')
       .week();
@@ -78,9 +81,9 @@ export default class DatePicker extends React.Component {
   };
 
   static defaultProps = {
-    endDate: moment('2018-01-31'),
+    endDate: moment('2018-01-31').utc(),
     numberOfCalendars: 2,
-    startDate: moment('1990-01-01'),
+    startDate: moment('1990-01-09').utc(),
   };
 
   state = {
@@ -104,7 +107,8 @@ export default class DatePicker extends React.Component {
    */
   isValidDate(displayedMonth) {
     const { startDate, endDate } = this.props;
-    const compareTo = moment().year(displayedMonth.year).month(displayedMonth.month).startOf('month');
+    const compareTo = moment().year(displayedMonth.year).month(displayedMonth.month).utc()
+      .startOf('month');
     // checks if the month is in the range, so if the 01.01 is specified as endDate january should still be valid
     return compareTo.isBetween(startDate, endDate) || compareTo.isSame(startDate) || compareTo.isSame(endDate);
   }
@@ -172,6 +176,7 @@ export default class DatePicker extends React.Component {
 
     return moment().year(currentMonth.year + modification.year)
       .month(currentMonth.month + modification.month)
+      .utc()
       .diff(moment()
         .year(predecessor.year)
         .month(predecessor.month), 'months');
@@ -193,6 +198,7 @@ export default class DatePicker extends React.Component {
 
     return moment().year(successor.year)
       .month(successor.month)
+      .utc()
       .diff(moment()
         .year(currentMonth.year + modification.year)
         .month(currentMonth.month + modification.month), 'months');

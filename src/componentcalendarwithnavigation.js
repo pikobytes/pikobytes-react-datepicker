@@ -52,8 +52,10 @@ export default class CalendarWithNavigation extends React.Component {
         {moment().year(monthSelection.year).month(monthSelection.month).format('DD MMM YYYY')}
         {modifications.map(modification =>
           (this.blockMonth(modification)
-            ? <a className={`${button} blocked`}>{modification.text}</a>
+            ? <a className={`${button} blocked`}
+              key={modification.text}>{modification.text}</a>
             : <a className={button}
+              key={modification.text}
               onClick={this.modifyCalendarMonth.bind(this, modification)}>{modification.text}</a>))}
       </div>
       <Calendar {... this.props}/>

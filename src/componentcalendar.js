@@ -42,6 +42,27 @@ export default class Calendar extends React.Component {
     return date.isSame(end) || date.isBetween(start, end);
   }
 
+  renderDay(day) {
+    const { month } = this.props;
+
+    return day.month() === month.month
+      ? <td key={`${day.year()}.${day.month()}.${day.date()}`}
+        className={`${Calendar.determineSelection(day, this.props.selectionEnd, this.props.selectionStart)
+          ? 'is-selected'
+          : ''}  ${Calendar.determineSelection(day, this.props.temporaryEnd, this.props.temporaryStart)
+          ? 'will-be-selected'
+          : ''}`}
+
+        onClick={this.selectionHandler.bind(this, day)}
+        onMouseOver={this.hoverHandler.bind(this, day)}>
+        {day.date() === 1 ? day.format('D. MMM') : day.format('D')}
+      </td>
+      : <td key={`${day.year()}.${day.month()}.${day.date()}`}
+        className="inactive">
+        {day.date() === 1 ? day.format('D. MMM') : day.format('D')}
+      </td>;
+  }
+
 
   render() {
     const { month } = this.props;
@@ -62,18 +83,7 @@ export default class Calendar extends React.Component {
         { /* Iterate over the weeks of a monthObject. Generate for each week a row. Then iterate over the days of a week and generate a
         cell for every day. */}
         {month.weeks.map(week =>
-          <tr key={week.week}>{week.days.map(day =>
-            <td key={`${day.year()}.${day.month()}.${day.date()}`}
-              className={`${Calendar.determineSelection(day, this.props.selectionEnd, this.props.selectionStart)
-                ? 'is-selected'
-                : ''}  ${Calendar.determineSelection(day, this.props.temporaryEnd, this.props.temporaryStart)
-                ? 'will-be-selected'
-                : ''}`}
-
-              onClick={this.selectionHandler.bind(this, day)}
-              onMouseOver={this.hoverHandler.bind(this, day)}>
-              {day.date() === 1 ? day.format('D. MMM') : day.format('D')}
-            </td>)}</tr>)}
+          <tr key={week.week}>{week.days.map(this.renderDay.bind(this))}</tr>)}
       </tbody>
     </table>;
   }
