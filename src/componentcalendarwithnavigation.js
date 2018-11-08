@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 import Calendar from './componentcalendar';
 
 export default class CalendarWithNavigation extends React.Component {
+  // TODO: rename props
   static propTypes = {
     hoverHandler: PropTypes.func,
-    identifier: PropTypes.string,
+    index: PropTypes.number,
     month: PropTypes.shape({
       month: PropTypes.number,
       weeks: PropTypes.array,
@@ -29,19 +30,19 @@ export default class CalendarWithNavigation extends React.Component {
 
   render() {
     const button = 'button';
-    const { monthSelection, identifier } = this.props;
+    const { monthSelection, index } = this.props;
     return <div>
       <div className="month-selection"><a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, monthSelection, { month: 0, year: 1 }, identifier)}> inc year</a>
+        onClick={this.modifyCalendarMonth.bind(this, { month: 0, year: 1 }, index)}> inc year</a>
       <p>{monthSelection.year}</p>
       <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, monthSelection, { month: 0, year: -1 }, identifier)}> dec year</a>
+        onClick={this.modifyCalendarMonth.bind(this, { month: 0, year: -1 }, index)}> dec year</a>
       <br/>
       <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, monthSelection, { month: 1, year: 0 }, identifier)}> inc month</a>
+        onClick={this.modifyCalendarMonth.bind(this, { month: 1, year: 0 }, index)}> inc month</a>
       <p>{monthSelection.month + 1}</p>
       <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, monthSelection, { month: -1, year: 0 }, identifier)}> dec month</a>
+        onClick={this.modifyCalendarMonth.bind(this, { month: -1, year: 0 }, index)}> dec month</a>
       </div>
       <Calendar {... this.props}/>
     </div>;
