@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 
 export default class Calendar extends React.Component {
   static propTypes = {
+    endDate: PropTypes.object, // moment
     hoverHandler: PropTypes.func,
     month: PropTypes.shape({
       month: PropTypes.number,
@@ -11,6 +13,7 @@ export default class Calendar extends React.Component {
     selectionHandler: PropTypes.func,
     selectionStart: PropTypes.object, // moment
     selectionEnd: PropTypes.object, // moment
+    startDate: PropTypes.object, // moment
     temporaryStart: PropTypes.object, // moment
     temporaryEnd: PropTypes.object, // moment
   };
@@ -25,9 +28,9 @@ export default class Calendar extends React.Component {
 
   /**
    * determines whether a single date is selected
-   * @param date which should be checked for selection
-   * @param end date of the selection
-   * @param start date of the selection
+   * @param {moment} date which should be checked for selection
+   * @param {moment} end date of the selection
+   * @param {moment} start date of the selection
    * @returns {boolean} states if the date is in the range and therefor selected
    */
   static determineSelection(date, end, start) {
@@ -42,21 +45,42 @@ export default class Calendar extends React.Component {
     return date.isSame(end) || date.isBetween(start, end);
   }
 
-  renderDay(day) {
-    const { month } = this.props;
-
-    return day.month() === month.month
+  /**
+   * renders a day with Handlers
+   * @param {moment} day which should be rendered
+   * @returns {*}
+   */
+  renderDayWithHandlers(day) {
+    const { selectionEnd, selectionStart, temporaryEnd, temporaryStart } = this.props;
+    // if no selection is in progress, do not render an onMouseOver handler, because it is not needed
+    return typeof selectionStart === 'undefined' || (typeof selectionEnd !== 'undefined')
       ? <td key={`${day.year()}.${day.month()}.${day.date()}`}
-        className={`${Calendar.determineSelection(day, this.props.selectionEnd, this.props.selectionStart)
+        className={`day ${Calendar.determineSelection(day, selectionEnd, selectionStart)
           ? 'is-selected'
-          : ''}  ${Calendar.determineSelection(day, this.props.temporaryEnd, this.props.temporaryStart)
+          : ''} ${Calendar.determineSelection(day, temporaryEnd, temporaryStart)
           ? 'will-be-selected'
           : ''}`}
-
+        onClick={this.selectionHandler.bind(this, day)}>
+        {day.date() === 1 ? day.format('D. MMM') : day.format('D')}
+      </td>
+      : <td key={`${day.year()}.${day.month()}.${day.date()}`}
+        className={`day ${Calendar.determineSelection(day, temporaryEnd, temporaryStart)
+          ? 'will-be-selected'
+          : ''}`}
         onClick={this.selectionHandler.bind(this, day)}
         onMouseOver={this.hoverHandler.bind(this, day)}>
         {day.date() === 1 ? day.format('D. MMM') : day.format('D')}
-      </td>
+      </td>;
+  }
+  /**
+   * renders a single day (moment)
+   * @param {moment} day to be rendered
+   * */
+  renderDay(day) {
+    const { endDate, month, startDate } = this.props;
+    // check whether the day actually belongs to this month
+    return (day.isAfter(startDate) && day.isBefore(endDate)) && day.month() === month.month
+      ? this.renderDayWithHandlers(day)
       : <td key={`${day.year()}.${day.month()}.${day.date()}`}
         className="inactive">
         {day.date() === 1 ? day.format('D. MMM') : day.format('D')}

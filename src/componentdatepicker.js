@@ -107,10 +107,9 @@ export default class DatePicker extends React.Component {
    */
   isValidDate(displayedMonth) {
     const { startDate, endDate } = this.props;
-    const compareTo = moment().year(displayedMonth.year).month(displayedMonth.month).utc()
-      .startOf('month');
+    const compareTo = moment().year(displayedMonth.year).month(displayedMonth.month).utc();
     // checks if the month is in the range, so if the 01.01 is specified as endDate january should still be valid
-    return compareTo.isBetween(startDate, endDate) || compareTo.isSame(startDate) || compareTo.isSame(endDate);
+    return compareTo.isBetween(startDate, endDate, 'month') || compareTo.isSame(startDate, 'month') || compareTo.isSame(endDate, 'month');
   }
 
   /**
@@ -279,8 +278,8 @@ export default class DatePicker extends React.Component {
 
     const newState = {
       selectionHandler: this.selectionStartHandler,
-      temporaryEnd: date,
-      temporaryStart: date,
+      temporaryEnd: undefined,
+      temporaryStart: undefined,
     };
 
     if (date.isBefore(selectionStart)) {
@@ -321,13 +320,16 @@ export default class DatePicker extends React.Component {
       temporaryStart,
     } = this.state;
 
+    const { startDate, endDate } = this.props;
+
     return <div>
       {displayError && <p>The date you tried to select is not available.</p>}
 
       {calendar.length > 0
         ? displayedMonths.map((selectedMonth, index) =>
           <CalendarWithNavigation
-            blockMonth={this.isModificationAllowed.bind(this)}
+            allowModification={this.isModificationAllowed.bind(this)}
+            endDate={endDate}
             hoverHandler={this.hoverHandler.bind(this)}
             index={index}
             key={index}
@@ -339,6 +341,7 @@ export default class DatePicker extends React.Component {
             selectionHandler={selectionHandler.bind(this)}
             selectionStart={selectionStart}
             selectionEnd={selectionEnd}
+            startDate={startDate}
             temporaryStart={temporaryStart}
             temporaryEnd={temporaryEnd}/>)
         : 'no cal'}

@@ -4,9 +4,10 @@ import moment from 'moment';
 import Calendar from './componentcalendar';
 
 export default class CalendarWithNavigation extends React.Component {
-  // TODO: rename props
   static propTypes = {
+    allowModification: PropTypes.func,
     hoverHandler: PropTypes.func,
+    endDate: PropTypes.object, // moment
     index: PropTypes.number,
     month: PropTypes.shape({
       month: PropTypes.number,
@@ -20,6 +21,7 @@ export default class CalendarWithNavigation extends React.Component {
     selectionHandler: PropTypes.func,
     selectionStart: PropTypes.object, // moment
     selectionEnd: PropTypes.object, // moment
+    startDate: PropTypes.object, // moment
     temporaryStart: PropTypes.object, // mom]ent
     temporaryEnd: PropTypes.object, // moment
   };
@@ -32,9 +34,9 @@ export default class CalendarWithNavigation extends React.Component {
   }
 
   blockMonth(modification) {
-    const { index, blockMonth } = this.props;
+    const { index, allowModification } = this.props;
 
-    return !blockMonth(index, modification);
+    return !allowModification(index, modification);
   }
 
   render() {
@@ -49,7 +51,7 @@ export default class CalendarWithNavigation extends React.Component {
 
     return <div>
       <div className="month-selection">
-        {moment().year(monthSelection.year).month(monthSelection.month).format('DD MMM YYYY')}
+        {moment().year(monthSelection.year).month(monthSelection.month).format('MMM YYYY')}
         {modifications.map(modification =>
           (this.blockMonth(modification)
             ? <a className={`${button} blocked`}
