@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import Calendar from './componentcalendar';
 
 export default class CalendarWithNavigation extends React.Component {
@@ -24,25 +25,36 @@ export default class CalendarWithNavigation extends React.Component {
   };
 
   // wrapper around the handler passed in as prop to keep the this context, while still being able to bind the data to them later on
-  modifyCalendarMonth(calendar, modification, identifier) {
-    this.props.monthSelectionHandler(calendar, modification, identifier);
+  modifyCalendarMonth(modification) {
+    const { index } = this.props;
+
+    this.props.monthSelectionHandler(modification, index);
+  }
+
+  blockMonth(modification) {
+    const { index, blockMonth } = this.props;
+
+    return !blockMonth(index, modification);
   }
 
   render() {
     const button = 'button';
-    const { monthSelection, index } = this.props;
+    const { monthSelection } = this.props;
+    const modifications = [
+      { month: 0, year: 1, text: 'incYear' },
+      { month: 0, year: -1, text: 'decYear' },
+      { month: 1, year: 0, text: 'incMonth' },
+      { month: -1, year: 0, text: 'decMonth' },
+    ];
+
     return <div>
-      <div className="month-selection"><a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, { month: 0, year: 1 }, index)}> inc year</a>
-      <p>{monthSelection.year}</p>
-      <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, { month: 0, year: -1 }, index)}> dec year</a>
-      <br/>
-      <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, { month: 1, year: 0 }, index)}> inc month</a>
-      <p>{monthSelection.month + 1}</p>
-      <a className={button}
-        onClick={this.modifyCalendarMonth.bind(this, { month: -1, year: 0 }, index)}> dec month</a>
+      <div className="month-selection">
+        {moment().year(monthSelection.year).month(monthSelection.month).format('DD MMM YYYY')}
+        {modifications.map(modification =>
+          (this.blockMonth(modification)
+            ? <a className={`${button} blocked`}>{modification.text}</a>
+            : <a className={button}
+              onClick={this.modifyCalendarMonth.bind(this, modification)}>{modification.text}</a>))}
       </div>
       <Calendar {... this.props}/>
     </div>;

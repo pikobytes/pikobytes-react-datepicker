@@ -9,3 +9,9 @@
     }
   }
 }
+
+.button{
+  &.blocked{
+    background-color: grey;
+  }
+}

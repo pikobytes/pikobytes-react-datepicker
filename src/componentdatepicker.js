@@ -114,18 +114,13 @@ export default class DatePicker extends React.Component {
    * @param {{
    *   year: number,
    *   month: number
-   * }} calendar currently selected month, identified by year and month
-   * @param {{
-   *   year: number,
-   *   month: number
    * }} modification change which should be applied to the currently displayed month
-   * @param {string} identifier meaning json key to which the calendar is identified in state
+   * @param {number} index meaning json key to which the calendar is identified in state
    */
-  // TODO: rename parameters
-  modifyCalendarMonth(modification, identifier) {
+  modifyCalendarMonth(modification, index) {
     const { displayedMonths } = this.state;
 
-    const oldDisplayedMonth = displayedMonths[identifier];
+    const oldDisplayedMonth = displayedMonths[index];
     let newMonth = oldDisplayedMonth.month + modification.month;
     let newYear = oldDisplayedMonth.year + modification.year;
 
@@ -146,8 +141,9 @@ export default class DatePicker extends React.Component {
 
     // just update the state if the month is defined, else display an error
     if (this.isValidDate(newDisplayedMonth)) {
+      // clone the array, before inserting
       const newDisplayedMonths = displayedMonths.slice(0);
-      newDisplayedMonths[identifier] = newDisplayedMonth;
+      newDisplayedMonths[index] = newDisplayedMonth;
 
       const newState = {
         displayedMonths: newDisplayedMonths,
@@ -160,32 +156,70 @@ export default class DatePicker extends React.Component {
     }
   }
 
-  blockMonth(identifier, newDisplayedMonth) {
+  /**
+   * calculates the distance of a month with applied modification to its predecessor in displayedMonths array
+   * @param index of the month, which should be checked, in the displayedMonths array
+   * @param {{
+   *   year: number,
+   *   month: number
+   * }} modification which should be applied
+   * @returns {number} of months between the month with applied modification and its predecessor
+   */
+  calcDistanceToPredecessor(index, modification) {
+    const { displayedMonths } = this.state;
+    const currentMonth = displayedMonths[index];
+    const predecessor = displayedMonths[index - 1];
+
+    return moment().year(currentMonth.year + modification.year)
+      .month(currentMonth.month + modification.month)
+      .diff(moment()
+        .year(predecessor.year)
+        .month(predecessor.month), 'months');
+  }
+
+  /**
+   *  calculates the distance of a month with applied modification to its successor in displayedMonths array
+   * @param index of the month, which should be checked, in the displayedMonths array
+   * @param {{
+   *   year: number,
+   *   month: number
+   * }} modification which should be applied
+   * @returns {number} of months between the month with applied modification and its successor
+   */
+  calcDistanceToSuccessor(index, modification) {
+    const { displayedMonths } = this.state;
+    const currentMonth = displayedMonths[index];
+    const successor = displayedMonths[index + 1];
+
+    return moment().year(successor.year)
+      .month(successor.month)
+      .diff(moment()
+        .year(currentMonth.year + modification.year)
+        .month(currentMonth.month + modification.month), 'months');
+  }
+
+  /**
+   * checks if the modification for a certain month should be blocked
+   * @param index of the month, which should be checked, in the displayedMonths array
+   * @param {{
+   *   year: number,
+   *   month: number
+   * }} modification which should be applied
+   * @returns {boolean} whether the modification is allowed or not
+   */
+  isModificationAllowed(index, modification) {
     const { displayedMonths } = this.state;
 
-
-    if (identifier === 0) {
-      // if first entry only check successor
-      const successorDifference = moment().year(displayedMonths[identifier + 1].year)
-        .month(displayedMonths[identifier + 1].month)
-        .diff(moment().year(newDisplayedMonth.year).month(newDisplayedMonth.month), 'months');
-      return successorDifference > 0;
-    } else if (identifier === displayedMonths.length - 1) {
-      const predecessorDifference = moment().year(newDisplayedMonth.year)
-        .month(newDisplayedMonth.month)
-        .diff(moment().year(displayedMonths[identifier - 1].year).month(displayedMonths[identifier - 1].month), 'months');
-      // if last entry only check predecessor
-      return predecessorDifference > 0;
+    if (index === 0) {
+      // first element has no predecessor, so only check distance to successor
+      return this.calcDistanceToSuccessor(index, modification) > 0;
+    } else if (index >= displayedMonths.length - 1) {
+      // last element has no successor, so only check distance to predecessor
+      return this.calcDistanceToPredecessor(index, modification) > 0;
     }
-    // if there are more than 2 calendars check both
-
-    const successorDifference = moment().year(displayedMonths[identifier + 1].year)
-      .month(displayedMonths[identifier + 1].month)
-      .diff(moment().year(newDisplayedMonth.year).month(newDisplayedMonth.month), 'months');
-    const predecessorDifference = moment().year(newDisplayedMonth.year)
-      .month(newDisplayedMonth.month)
-      .diff(moment().year(displayedMonths[identifier - 1].year).month(displayedMonths[identifier - 1].month), 'months');
-    return successorDifference > 0 && predecessorDifference > 0;
+    // for every other element check both distances
+    return this.calcDistanceToPredecessor(index, modification) > 0
+      && this.calcDistanceToSuccessor(index, modification) > 0;
   }
 
   /**
@@ -204,7 +238,7 @@ export default class DatePicker extends React.Component {
     const displayedMonths = [];
     for (let iterations = 0; iterations < numberOfCalendars; iterations++) {
       displayedMonths.push({
-        year: startDate.year(),
+        year: startDate.year() + iterations,
         month: startDate.month(),
       });
     }
@@ -287,6 +321,7 @@ export default class DatePicker extends React.Component {
       {calendar.length > 0
         ? displayedMonths.map((selectedMonth, index) =>
           <CalendarWithNavigation
+            blockMonth={this.isModificationAllowed.bind(this)}
             hoverHandler={this.hoverHandler.bind(this)}
             index={index}
             key={index}
