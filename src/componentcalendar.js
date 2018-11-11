@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 
 export default class Calendar extends React.Component {
   static propTypes = {
@@ -52,26 +51,33 @@ export default class Calendar extends React.Component {
    */
   renderDayWithHandlers(day) {
     const { selectionEnd, selectionStart, temporaryEnd, temporaryStart } = this.props;
+
     // if no selection is in progress, do not render an onMouseOver handler, because it is not needed
     return typeof selectionStart === 'undefined' || (typeof selectionEnd !== 'undefined')
       ? <td key={`${day.year()}.${day.month()}.${day.date()}`}
         className={`day ${Calendar.determineSelection(day, selectionEnd, selectionStart)
           ? 'is-selected'
-          : ''} ${Calendar.determineSelection(day, temporaryEnd, temporaryStart)
+          : ''
+        } ${Calendar.determineSelection(day, temporaryEnd, temporaryStart)
           ? 'will-be-selected'
+          : ''} ${(day.isSame(selectionEnd, 'day') || day.isSame(selectionStart, 'day'))
+          ? 'is-selected-border'
           : ''}`}
         onClick={this.selectionHandler.bind(this, day)}>
-        {day.date() === 1 ? day.format('D. MMM') : day.format('D')}
+        {day.format('D')}
       </td>
       : <td key={`${day.year()}.${day.month()}.${day.date()}`}
         className={`day ${Calendar.determineSelection(day, temporaryEnd, temporaryStart)
           ? 'will-be-selected'
+          : ''} ${(day.isSame(temporaryEnd, 'day') || day.isSame(temporaryStart, 'day'))
+          ? 'is-selected-border'
           : ''}`}
         onClick={this.selectionHandler.bind(this, day)}
         onMouseOver={this.hoverHandler.bind(this, day)}>
-        {day.date() === 1 ? day.format('D. MMM') : day.format('D')}
+        {day.format('D')}
       </td>;
   }
+
   /**
    * renders a single day (moment)
    * @param {moment} day to be rendered
@@ -83,7 +89,7 @@ export default class Calendar extends React.Component {
       ? this.renderDayWithHandlers(day)
       : <td key={`${day.year()}.${day.month()}.${day.date()}`}
         className="inactive">
-        {day.date() === 1 ? day.format('D. MMM') : day.format('D')}
+        {day.format('D')}
       </td>;
   }
 
@@ -94,13 +100,13 @@ export default class Calendar extends React.Component {
     return <table className='table'>
       <thead>
         <tr>
-          <th>monday</th>
-          <th>tuesday</th>
-          <th>wednesday</th>
-          <th>thursday</th>
-          <th>friday</th>
-          <th>saturday</th>
-          <th>sunday</th>
+          <th>m</th>
+          <th>t</th>
+          <th>w</th>
+          <th>t</th>
+          <th>f</th>
+          <th>s</th>
+          <th>s</th>
         </tr>
       </thead>
       <tbody>

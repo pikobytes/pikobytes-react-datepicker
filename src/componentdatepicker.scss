@@ -1,25 +1,3 @@
-.will-be-selected{
-  background-color: orangered;
+.date-picker{
+  display: flex;
 }
-
-.table{
-  .is-selected{
-    &.will-be-selected{
-      background-color: blue;
-    }
-  }
-  .inactive{
-    background-color: lightgray;
-    color: grey;
-  }
-  .day:hover {
-    background-color: blue;
-  }
-}
-
-.button{
-  &.blocked{
-    background-color: grey;
-  }
-}
-

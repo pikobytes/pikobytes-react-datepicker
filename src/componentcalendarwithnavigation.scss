@@ -1,0 +1,45 @@
+.month-selection{
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  > .modification-row{
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.calendar-container{
+  margin: 15px;
+}
+
+.will-be-selected{
+  background-color: #4cffe6;
+}
+
+.table{
+  margin-top: 5px;
+  .is-selected{
+    &.is-selected-border{
+      background-color: #226b5b;
+    }
+  }
+
+  .is-selected-border{
+    background-color: #226b5b;
+  }
+
+  .inactive{
+    background-color: lightgray;
+    color: grey;
+  }
+
+  .day:hover {
+    background-color: #226b5b;
+  }
+}
+
+.button{
+  &.blocked{
+    visibility: hidden;
+  }
+}

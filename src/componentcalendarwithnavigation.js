@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import Calendar from './componentcalendar';
 
+import './componentcalendarwithnavigation.css';
+
 export default class CalendarWithNavigation extends React.Component {
   static propTypes = {
     allowModification: PropTypes.func,
@@ -26,7 +28,7 @@ export default class CalendarWithNavigation extends React.Component {
     temporaryEnd: PropTypes.object, // moment
   };
 
-  // wrapper around the handler passed in as prop to keep the this context, while still being able to bind the data to them later on
+  // wrappers around the handlers passed in as prop to keep the this context, while still being able to bind the data to them later on
   modifyCalendarMonth(modification) {
     const { index } = this.props;
 
@@ -34,7 +36,7 @@ export default class CalendarWithNavigation extends React.Component {
   }
 
   blockMonth(modification) {
-    const { index, allowModification } = this.props;
+    const { allowModification, index } = this.props;
 
     return !allowModification(index, modification);
   }
@@ -42,23 +44,38 @@ export default class CalendarWithNavigation extends React.Component {
   render() {
     const button = 'button';
     const { monthSelection } = this.props;
-    const modifications = [
-      { month: 0, year: 1, text: 'incYear' },
-      { month: 0, year: -1, text: 'decYear' },
-      { month: 1, year: 0, text: 'incMonth' },
-      { month: -1, year: 0, text: 'decMonth' },
-    ];
+    const modifications = [[
+      { month: 0, year: -1, text: '<<' },
+      { month: undefined, year: undefined, text: monthSelection.year },
+      { month: 0, year: 1, text: '>>' },
+    ],
+    [
+      { month: -1, year: 0, text: '<' },
+      { month: undefined, year: undefined, text: monthSelection.month + 1 },
+      { month: 1, year: 0, text: '>' },
+    ]];
 
-    return <div>
+    return <div className="calendar-container">
       <div className="month-selection">
-        {moment().year(monthSelection.year).month(monthSelection.month).format('MMM YYYY')}
-        {modifications.map(modification =>
-          (this.blockMonth(modification)
-            ? <a className={`${button} blocked`}
-              key={modification.text}>{modification.text}</a>
-            : <a className={button}
-              key={modification.text}
-              onClick={this.modifyCalendarMonth.bind(this, modification)}>{modification.text}</a>))}
+        {moment()
+          .year(monthSelection.year)
+          .month(monthSelection.month)
+          .format('MMM YYYY')}
+        {modifications.map(x =>
+          <div className="modification-row">
+
+
+            {x.map(modification =>
+
+              (typeof modification.year === 'undefined'
+                ? <p key={modification.text}>{modification.text}</p>
+                : this.blockMonth(modification)
+                  ? <a className={`${button} blocked`}
+                    key={modification.text}>{modification.text}</a>
+                  : <a className={button}
+                    key={modification.text}
+                    onClick={this.modifyCalendarMonth.bind(this, modification)}>{modification.text}</a>))}
+          </div>)}
       </div>
       <Calendar {... this.props}/>
     </div>;

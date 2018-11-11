@@ -55,6 +55,7 @@ function buildCalendar(year) {
       startWeek = 1;
       weeks.push({ week: 53, days: generateDays(year - 1, 0, 53) });
     }
+
     // the week containing january the first is handled as the first week of the next year
     if (endWeek === 1) {
       endWeek = 53;
@@ -66,6 +67,7 @@ function buildCalendar(year) {
         days: generateDays(year, month, week),
       });
     }
+
     nextMonth.weeks = weeks;
     months.push(nextMonth);
   }
@@ -75,39 +77,55 @@ function buildCalendar(year) {
 
 export default class DatePicker extends React.Component {
   static propTypes = {
-    endDate: propTypes.object, // moment Object
+    endDate: propTypes.object, // moment
     numberOfCalendars: propTypes.number,
-    startDate: propTypes.object, // moment Object
+    selectionStart: propTypes.object, // moment
+    selectionEnd: propTypes.object, // moment
+    startDate: propTypes.object, // moment
   };
 
   static defaultProps = {
     endDate: moment('2018-01-31').utc(),
     numberOfCalendars: 2,
-    startDate: moment('1990-01-09').utc(),
+    selectionStart: undefined,
+    selectopmEnd: undefined,
+    startDate: moment('1990-01-19').utc(),
   };
 
-  state = {
-    calendar: [],
-    displayError: false,
-    displayedMonths: [],
-    selectionStart: undefined,
-    selectionEnd: undefined,
-    selectionHandler: this.selectionStartHandler,
-    temporaryEnd: undefined,
-    temporaryStart: undefined,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      calendar: [],
+      displayError: false,
+      displayedMonths: [],
+      selectionStart: props.selectionStart,
+      selectionEnd: props.selectionEnd,
+      selectionHandler: this.selectionStartHandler,
+      temporaryEnd: undefined,
+      temporaryStart: undefined,
+    };
+  }
 
   /**
    * checks whether the month is valid, means if it is in the defined range (startDate - endDate)
+   * @param {number} index of the month to check in displayedMonths array
    * @param {{
    *   year: number,
-   *   month: number
-   * }} displayedMonth, identified by year and month
+   *   month: number,
+   * }} modification change which should be applied to the currently displayed month
    * @returns {boolean} states whether the month is valid
    */
-  isValidDate(displayedMonth) {
+  isValidDate(index, modification) {
     const { startDate, endDate } = this.props;
-    const compareTo = moment().year(displayedMonth.year).month(displayedMonth.month).utc();
+    const { displayedMonths } = this.state;
+
+    const displayedMonth = displayedMonths[index];
+
+    const compareTo = moment()
+      .year(displayedMonth.year + modification.year)
+      .month(displayedMonth.month + modification.month)
+      .utc();
+
     // checks if the month is in the range, so if the 01.01 is specified as endDate january should still be valid
     return compareTo.isBetween(startDate, endDate, 'month') || compareTo.isSame(startDate, 'month') || compareTo.isSame(endDate, 'month');
   }
@@ -142,21 +160,15 @@ export default class DatePicker extends React.Component {
       year: newYear,
     };
 
-    // just update the state if the month is defined, else display an error
-    if (this.isValidDate(newDisplayedMonth)) {
       // clone the array, before inserting
-      const newDisplayedMonths = displayedMonths.slice(0);
-      newDisplayedMonths[index] = newDisplayedMonth;
+    const newDisplayedMonths = displayedMonths.slice(0);
+    newDisplayedMonths[index] = newDisplayedMonth;
 
-      const newState = {
-        displayedMonths: newDisplayedMonths,
-        displayError: false,
-      };
+    const newState = {
+      displayedMonths: newDisplayedMonths,
+    };
 
-      this.setState(newState);
-    } else {
-      this.setState({ displayError: true });
-    }
+    this.setState(newState);
   }
 
   /**
@@ -178,7 +190,7 @@ export default class DatePicker extends React.Component {
       .utc()
       .diff(moment()
         .year(predecessor.year)
-        .month(predecessor.month), 'months');
+        .month(predecessor.month), 'months', true);
   }
 
   /**
@@ -200,7 +212,7 @@ export default class DatePicker extends React.Component {
       .utc()
       .diff(moment()
         .year(currentMonth.year + modification.year)
-        .month(currentMonth.month + modification.month), 'months');
+        .month(currentMonth.month + modification.month), 'months', true);
   }
 
   /**
@@ -214,6 +226,10 @@ export default class DatePicker extends React.Component {
    */
   isModificationAllowed(index, modification) {
     const { displayedMonths } = this.state;
+
+    if (!this.isValidDate(index, modification)) {
+      return false;
+    }
 
     if (index === 0) {
       // first element has no predecessor, so only check distance to successor
@@ -251,6 +267,7 @@ export default class DatePicker extends React.Component {
     this.setState({ calendar: calendar,
       displayedMonths: displayedMonths });
   }
+
   /**
    * sets the startDate of a selection and changes the selectionHandler to the selectionEndHandler
    * @param {moment} date which should be selected startDate
@@ -311,7 +328,6 @@ export default class DatePicker extends React.Component {
   render() {
     const {
       calendar,
-      displayError,
       displayedMonths,
       selectionStart,
       selectionEnd,
@@ -322,9 +338,7 @@ export default class DatePicker extends React.Component {
 
     const { startDate, endDate } = this.props;
 
-    return <div>
-      {displayError && <p>The date you tried to select is not available.</p>}
-
+    return <div className="date-picker">
       {calendar.length > 0
         ? displayedMonths.map((selectedMonth, index) =>
           <CalendarWithNavigation
@@ -332,6 +346,7 @@ export default class DatePicker extends React.Component {
             endDate={endDate}
             hoverHandler={this.hoverHandler.bind(this)}
             index={index}
+            isValidHandler={this.isValidDate.bind(this)}
             key={index}
             month={calendar
               .filter(x => x.year === selectedMonth.year)[0].months
