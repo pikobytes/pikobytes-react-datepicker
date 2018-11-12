@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import moment from 'moment';
 import propTypes from 'prop-types';
 import CalendarWithNavigation from './componentcalendarwithnavigation';
@@ -75,7 +75,7 @@ function buildCalendar(year) {
 }
 
 
-export default class DatePicker extends React.Component {
+export default class DatePicker extends Component {
   static propTypes = {
     endDate: propTypes.object, // moment
     numberOfCalendars: propTypes.number,
@@ -88,7 +88,7 @@ export default class DatePicker extends React.Component {
     endDate: moment('2018-01-31').utc(),
     numberOfCalendars: 2,
     selectionStart: undefined,
-    selectopmEnd: undefined,
+    selectionEnd: undefined,
     startDate: moment('1990-01-19').utc(),
   };
 
@@ -134,7 +134,7 @@ export default class DatePicker extends React.Component {
    * modifies the currently displayed month
    * @param {{
    *   year: number,
-   *   month: number
+   *   month: number,
    * }} modification change which should be applied to the currently displayed month
    * @param {number} index meaning json key to which the calendar is identified in state
    */
@@ -164,11 +164,9 @@ export default class DatePicker extends React.Component {
     const newDisplayedMonths = displayedMonths.slice(0);
     newDisplayedMonths[index] = newDisplayedMonth;
 
-    const newState = {
+    this.setState({
       displayedMonths: newDisplayedMonths,
-    };
-
-    this.setState(newState);
+    });
   }
 
   /**
@@ -176,7 +174,7 @@ export default class DatePicker extends React.Component {
    * @param index of the month, which should be checked, in the displayedMonths array
    * @param {{
    *   year: number,
-   *   month: number
+   *   month: number,
    * }} modification which should be applied
    * @returns {number} of months between the month with applied modification and its predecessor
    */
@@ -264,8 +262,10 @@ export default class DatePicker extends React.Component {
       });
     }
 
-    this.setState({ calendar: calendar,
-      displayedMonths: displayedMonths });
+    this.setState({
+      calendar: calendar,
+      displayedMonths: displayedMonths,
+    });
   }
 
   /**
@@ -279,11 +279,11 @@ export default class DatePicker extends React.Component {
       selectionHandler: this.selectionEndHandler,
     };
 
-    if (this.state.selectionEnd === date) {
-      newState.temporaryStart = date;
-    }
-
-    this.setState(newState);
+    this.setState(
+      this.state.selectionEnd === date
+        ? Object.assign(newState, { temporaryStart: date })
+        : newState,
+    );
   }
 
   /**

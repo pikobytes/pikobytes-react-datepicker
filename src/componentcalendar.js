@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-export default class Calendar extends React.Component {
+export default class Calendar extends Component {
   static propTypes = {
     endDate: PropTypes.object, // moment
     hoverHandler: PropTypes.func,

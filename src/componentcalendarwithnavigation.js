@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import Calendar from './componentcalendar';
 
 import './componentcalendarwithnavigation.css';
 
-export default class CalendarWithNavigation extends React.Component {
+export default class CalendarWithNavigation extends Component {
   static propTypes = {
     allowModification: PropTypes.func,
     hoverHandler: PropTypes.func,
@@ -48,8 +48,7 @@ export default class CalendarWithNavigation extends React.Component {
       { month: 0, year: -1, text: '<<' },
       { month: undefined, year: undefined, text: monthSelection.year },
       { month: 0, year: 1, text: '>>' },
-    ],
-    [
+    ], [
       { month: -1, year: 0, text: '<' },
       { month: undefined, year: undefined, text: monthSelection.month + 1 },
       { month: 1, year: 0, text: '>' },
@@ -66,7 +65,6 @@ export default class CalendarWithNavigation extends React.Component {
 
 
             {x.map(modification =>
-
               (typeof modification.year === 'undefined'
                 ? <p key={modification.text}>{modification.text}</p>
                 : this.blockMonth(modification)

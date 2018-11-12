@@ -12,7 +12,7 @@ export default class App extends Component {
    */
   render() {
     return <div className="container template-app">
-      <DatePicker selectionStart={moment('1990-02-08 09+00:00')} selectionEnd={moment('1991-03-31 00+00:00').utc()}/>
+      <DatePicker selectionStart={moment('1990-02-08 09+00:00')} selectionEnd={moment('1991-03-31 00+00:00')}/>
     </div>;
   }
 }
