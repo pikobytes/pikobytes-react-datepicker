@@ -9,6 +9,7 @@
 }
 
 .calendar-container{
+  width: 50%;
   margin: 15px;
 }
 
@@ -17,6 +18,7 @@
 }
 
 .table{
+  width: 100%;
   margin-top: 5px;
   .is-selected{
     &.is-selected-border{
