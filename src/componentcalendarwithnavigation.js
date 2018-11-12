@@ -9,17 +9,17 @@ export default class CalendarWithNavigation extends Component {
   static propTypes = {
     allowModification: PropTypes.func,
     endDate: PropTypes.object, // moment
-    format: PropTypes.string,
+    format: PropTypes.string.isRequired,
     hoverHandler: PropTypes.func,
     index: PropTypes.number,
     month: PropTypes.shape({
-      month: PropTypes.number,
-      weeks: PropTypes.array,
-    }),
+      month: PropTypes.number.isRequired,
+      weeks: PropTypes.array.isRequired,
+    }).isRequired,
     monthSelection: PropTypes.shape({
-      month: PropTypes.number,
-      year: PropTypes.number,
-    }),
+      month: PropTypes.number.isRequired,
+      year: PropTypes.number.isRequired,
+    }).isRequired,
     monthSelectionHandler: PropTypes.func,
     selectionHandler: PropTypes.func,
     selectionStart: PropTypes.object, // moment
@@ -30,16 +30,34 @@ export default class CalendarWithNavigation extends Component {
   };
 
   // wrappers around the handlers passed in as prop to keep the this context, while still being able to bind the data to them later on
+  /**
+   * calls the passed in handler if it is defined
+   * @param {{
+   *   year: number,
+   *   month: number
+   * }} modification which should be applied
+   */
   modifyCalendarMonth(modification) {
-    const { index } = this.props;
-
-    this.props.monthSelectionHandler(modification, index);
+    const { index, monthSelectionHandler } = this.props;
+    if (monthSelectionHandler !== undefined) {
+      monthSelectionHandler(modification, index);
+    }
   }
 
+  /**
+   * calls the passed in handler if it is defined to check if the navigations should be rendered
+   * @param {{
+   *   year: number,
+   *   month: number
+   * }} modification which should be applied
+   * @returns {boolean} states if the month should be blocked
+   */
   blockMonth(modification) {
     const { allowModification, index } = this.props;
-
-    return !allowModification(index, modification);
+    if (allowModification !== undefined) {
+      return !allowModification(index, modification);
+    }
+    return false;
   }
 
   render() {

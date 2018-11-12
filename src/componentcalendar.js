@@ -7,9 +7,9 @@ export default class Calendar extends Component {
     format: PropTypes.string,
     hoverHandler: PropTypes.func,
     month: PropTypes.shape({
-      month: PropTypes.number,
-      weeks: PropTypes.array,
-    }),
+      month: PropTypes.number.isRequired,
+      weeks: PropTypes.array.isRequired,
+    }).isRequired,
     selectionHandler: PropTypes.func,
     selectionStart: PropTypes.object, // moment
     selectionEnd: PropTypes.object, // moment
@@ -20,10 +20,16 @@ export default class Calendar extends Component {
 
   // wrappers around the handlers passed in as props to keep the this contexts, while still being able to bind the dates to them later on
   selectionHandler(date) {
-    this.props.selectionHandler(date);
+    const { selectionHandler } = this.props;
+    if (selectionHandler !== undefined) {
+      selectionHandler(date);
+    }
   }
   hoverHandler(date) {
-    this.props.hoverHandler(date);
+    const { hoverHandler } = this.props;
+    if (hoverHandler !== undefined) {
+      hoverHandler(date);
+    }
   }
 
   /**
@@ -46,7 +52,7 @@ export default class Calendar extends Component {
   }
 
   /**
-   * renders a day with Handlers
+   * renders a day with handlers
    * @param {moment} day which should be rendered
    * @returns {*}
    */

@@ -13,7 +13,7 @@ const INITDATE = '1990-02-01 00+00:00';
  * @param {number} week - the concrete week which should be generated
  * @returns {moment.Moment[]} array of size 7, representing a week
  */
-function generateDays(year, month, week) {
+export function generateDays(year, month, week) {
   return Array(7).fill(0).map((n, i) => moment(INITDATE)
     .year(year)
     .month(month)
@@ -29,7 +29,7 @@ function generateDays(year, month, week) {
  * @param {number} year for which the calendar should be generated
  * @returns {Array} containing all months of a year
  */
-function buildCalendar(year) {
+export function buildCalendarYear(year) {
   const months = [];
   for (let month = 0; month <= 11; month++) {
     const nextMonth = {
@@ -74,6 +74,23 @@ function buildCalendar(year) {
   return months;
 }
 
+/**
+ * generates a whole calendar, with every year and month between start and end Date
+ * @param startDate of the generated calendar
+ * @param endDate of the generated calendar
+ * @returns {Array} of year-objects
+ */
+export function generateCalendar(startDate, endDate) {
+  const calendar = [];
+
+  for (let year = startDate.year(); year <= endDate.year(); year++) {
+    calendar.push({
+      year: year,
+      months: buildCalendarYear(year),
+    });
+  }
+  return calendar;
+}
 
 export default class DatePicker extends Component {
   static propTypes = {
@@ -135,22 +152,23 @@ export default class DatePicker extends Component {
         }
       }
       if (modification.year === -1) {
-        if (momentNew.isSameOrBefore(momentCompareTo)) {
+        if (momentCompareTo.isSameOrAfter(momentNew)) {
           newYear = compareTo.year;
           newMonth = compareTo.month + 1;
         }
       }
+    } else {
+      if (momentNew.isBefore(startDate, 'month')) {
+        newMonth = startDate.month();
+        newYear = startDate.year();
+      }
+
+      if (momentNew.isAfter(endDate, 'month')) {
+        newMonth = endDate.month();
+        newYear = endDate.year();
+      }
     }
 
-    if (momentNew.isBefore(startDate, 'month')) {
-      newMonth = startDate.month();
-      newYear = startDate.year();
-    }
-
-    if (momentNew.isAfter(endDate, 'month')) {
-      newMonth = endDate.month();
-      newYear = endDate.year();
-    }
 
     if (newMonth < 0) {
       newMonth = 11;
@@ -229,6 +247,7 @@ export default class DatePicker extends Component {
    * }} modification which should be applied
    * @returns {boolean} whether the modification is allowed or not
    */
+  // TODO: REWORK THE MESS
   isModificationAllowed(index, modification) {
     const { displayedMonths } = this.state;
     const { endDate, startDate } = this.props;
@@ -241,6 +260,8 @@ export default class DatePicker extends Component {
       return false;
     }
 
+
+    //  -11 is due to the months in a year, if its more than a year difference
     if (index === 0) {
       // first element has no predecessor only check distance to successor
       if (modification.year > 0) {
@@ -255,8 +276,15 @@ export default class DatePicker extends Component {
       return this.calcDistanceToPredecessor(index, modification) > -11;
     }
     // for every other element check both distances
-    return this.calcDistanceToPredecessor(index, modification) > 0
-      && this.calcDistanceToSuccessor(index, modification) > 0;
+    if (modification.year > 0) {
+      return this.calcDistanceToPredecessor(index, modification) > 0
+      && this.calcDistanceToSuccessor(index, modification) > -11;
+    } else if (modification.year === 0) {
+      return this.calcDistanceToPredecessor(index, modification) > 0
+        && this.calcDistanceToSuccessor(index, modification) > 0;
+    }
+    return this.calcDistanceToPredecessor(index, modification) > -11
+        && this.calcDistanceToSuccessor(index, modification) > 0;
   }
 
   /**
@@ -264,14 +292,7 @@ export default class DatePicker extends Component {
    */
   componentDidMount() {
     const { startDate, numberOfCalendars, endDate } = this.props;
-    const calendar = [];
-
-    for (let year = startDate.year(); year <= endDate.year(); year++) {
-      calendar.push({
-        year: year,
-        months: buildCalendar(year),
-      });
-    }
+    const calendar = generateCalendar(startDate, endDate);
     const displayedMonths = [];
     for (let iterations = 0; iterations < numberOfCalendars; iterations++) {
       displayedMonths.push({
@@ -353,6 +374,7 @@ export default class DatePicker extends Component {
       temporaryEnd,
       temporaryStart,
     } = this.state;
+
 
     const { startDate, endDate, format } = this.props;
 
