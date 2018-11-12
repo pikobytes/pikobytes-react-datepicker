@@ -8,8 +8,9 @@ import './componentcalendarwithnavigation.css';
 export default class CalendarWithNavigation extends Component {
   static propTypes = {
     allowModification: PropTypes.func,
-    hoverHandler: PropTypes.func,
     endDate: PropTypes.object, // moment
+    format: PropTypes.string,
+    hoverHandler: PropTypes.func,
     index: PropTypes.number,
     month: PropTypes.shape({
       month: PropTypes.number,
@@ -46,27 +47,28 @@ export default class CalendarWithNavigation extends Component {
     const { monthSelection } = this.props;
     const modifications = [[
       { month: 0, year: -1, text: '<<' },
-      { month: undefined, year: undefined, text: monthSelection.year },
+      { month: undefined, year: undefined, text: monthSelection.year, format: 'YYYY' },
       { month: 0, year: 1, text: '>>' },
     ], [
       { month: -1, year: 0, text: '<' },
-      { month: undefined, year: undefined, text: monthSelection.month + 1 },
+      { month: undefined, year: undefined, text: monthSelection.month + 1, format: 'MMM' },
       { month: 1, year: 0, text: '>' },
     ]];
 
     return <div className="calendar-container">
       <div className="month-selection">
-        {moment()
-          .year(monthSelection.year)
-          .month(monthSelection.month)
-          .format('MMM YYYY')}
-        {modifications.map(x =>
-          <div className="modification-row">
 
-
+        {modifications.map((x, index) =>
+          <div className="modification-row"
+            key={index}>
             {x.map(modification =>
-              (typeof modification.year === 'undefined'
-                ? <p key={modification.text}>{modification.text}</p>
+              (modification.year === undefined
+                ? <p key={modification.text}>
+                  {moment('1990-02-01 00+00:00')
+                    .month(monthSelection.month)
+                    .year(monthSelection.year)
+                    .format(modification.format)}
+                </p>
                 : this.blockMonth(modification)
                   ? <a className={`${button} blocked`}
                     key={modification.text}>{modification.text}</a>

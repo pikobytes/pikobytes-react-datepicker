@@ -4,6 +4,8 @@ import propTypes from 'prop-types';
 import CalendarWithNavigation from './componentcalendarwithnavigation';
 import './componentdatepicker.css';
 
+const INITDATE = '1990-02-01 00+00:00';
+
 /**
  * generates an array of size 7, representing a single week
  * @param {number} year - for which the week should be generated
@@ -12,7 +14,7 @@ import './componentdatepicker.css';
  * @returns {moment.Moment[]} array of size 7, representing a week
  */
 function generateDays(year, month, week) {
-  return Array(7).fill(0).map((n, i) => moment()
+  return Array(7).fill(0).map((n, i) => moment(INITDATE)
     .year(year)
     .month(month)
     .week(week)
@@ -36,14 +38,12 @@ function buildCalendar(year) {
     };
 
     // subtract is needed for the shift from sunday to monday as first day of the week
-    let startWeek = moment().year(year).month(month).utc()
+    let startWeek = moment(INITDATE).year(year).month(month)
       .startOf('month')
-      .subtract(1, 'days')
       .startOf('week')
       .week();
     let endWeek = moment().year(year).month(month).utc()
       .endOf('month')
-      .subtract(1, 'days')
       .startOf('week')
       .week();
 
@@ -78,6 +78,7 @@ function buildCalendar(year) {
 export default class DatePicker extends Component {
   static propTypes = {
     endDate: propTypes.object, // moment
+    format: propTypes.string,
     numberOfCalendars: propTypes.number,
     selectionStart: propTypes.object, // moment
     selectionEnd: propTypes.object, // moment
@@ -85,11 +86,12 @@ export default class DatePicker extends Component {
   };
 
   static defaultProps = {
-    endDate: moment('2018-01-31').utc(),
+    endDate: moment('2000-06-18 00+00:00'),
+    format: 'dd',
     numberOfCalendars: 2,
     selectionStart: undefined,
     selectionEnd: undefined,
-    startDate: moment('1990-01-19').utc(),
+    startDate: moment('1990-01-18 00+00:00'),
   };
 
   constructor(props) {
@@ -107,30 +109,6 @@ export default class DatePicker extends Component {
   }
 
   /**
-   * checks whether the month is valid, means if it is in the defined range (startDate - endDate)
-   * @param {number} index of the month to check in displayedMonths array
-   * @param {{
-   *   year: number,
-   *   month: number,
-   * }} modification change which should be applied to the currently displayed month
-   * @returns {boolean} states whether the month is valid
-   */
-  isValidDate(index, modification) {
-    const { startDate, endDate } = this.props;
-    const { displayedMonths } = this.state;
-
-    const displayedMonth = displayedMonths[index];
-
-    const compareTo = moment()
-      .year(displayedMonth.year + modification.year)
-      .month(displayedMonth.month + modification.month)
-      .utc();
-
-    // checks if the month is in the range, so if the 01.01 is specified as endDate january should still be valid
-    return compareTo.isBetween(startDate, endDate, 'month') || compareTo.isSame(startDate, 'month') || compareTo.isSame(endDate, 'month');
-  }
-
-  /**
    * modifies the currently displayed month
    * @param {{
    *   year: number,
@@ -140,10 +118,39 @@ export default class DatePicker extends Component {
    */
   modifyCalendarMonth(modification, index) {
     const { displayedMonths } = this.state;
-
+    const { startDate, endDate } = this.props;
     const oldDisplayedMonth = displayedMonths[index];
     let newMonth = oldDisplayedMonth.month + modification.month;
     let newYear = oldDisplayedMonth.year + modification.year;
+
+    const compareTo = displayedMonths[index + modification.year];
+    const momentNew = moment(INITDATE).year(newYear).month(newMonth);
+
+    if (compareTo !== undefined) {
+      const momentCompareTo = moment(INITDATE).year(compareTo.year).month(compareTo.month);
+      if (modification.year === 1) {
+        if (momentCompareTo.isSameOrBefore(momentNew)) {
+          newYear = compareTo.year;
+          newMonth = compareTo.month - 1;
+        }
+      }
+      if (modification.year === -1) {
+        if (momentNew.isSameOrBefore(momentCompareTo)) {
+          newYear = compareTo.year;
+          newMonth = compareTo.month + 1;
+        }
+      }
+    }
+
+    if (momentNew.isBefore(startDate, 'month')) {
+      newMonth = startDate.month();
+      newYear = startDate.year();
+    }
+
+    if (momentNew.isAfter(endDate, 'month')) {
+      newMonth = endDate.month();
+      newYear = endDate.year();
+    }
 
     if (newMonth < 0) {
       newMonth = 11;
@@ -160,10 +167,10 @@ export default class DatePicker extends Component {
       year: newYear,
     };
 
-      // clone the array, before inserting
+
+    // clone the array, before inserting
     const newDisplayedMonths = displayedMonths.slice(0);
     newDisplayedMonths[index] = newDisplayedMonth;
-
     this.setState({
       displayedMonths: newDisplayedMonths,
     });
@@ -183,10 +190,10 @@ export default class DatePicker extends Component {
     const currentMonth = displayedMonths[index];
     const predecessor = displayedMonths[index - 1];
 
-    return moment().year(currentMonth.year + modification.year)
+    return moment(INITDATE).year(currentMonth.year + modification.year)
       .month(currentMonth.month + modification.month)
       .utc()
-      .diff(moment()
+      .diff(moment(INITDATE)
         .year(predecessor.year)
         .month(predecessor.month), 'months', true);
   }
@@ -205,10 +212,10 @@ export default class DatePicker extends Component {
     const currentMonth = displayedMonths[index];
     const successor = displayedMonths[index + 1];
 
-    return moment().year(successor.year)
+    return moment(INITDATE).year(successor.year)
       .month(successor.month)
       .utc()
-      .diff(moment()
+      .diff(moment(INITDATE)
         .year(currentMonth.year + modification.year)
         .month(currentMonth.month + modification.month), 'months', true);
   }
@@ -224,17 +231,28 @@ export default class DatePicker extends Component {
    */
   isModificationAllowed(index, modification) {
     const { displayedMonths } = this.state;
+    const { endDate, startDate } = this.props;
+    const displayedMonth = displayedMonths[index];
 
-    if (!this.isValidDate(index, modification)) {
+    const momentDisplayed = moment(INITDATE).year(displayedMonth.year).month(displayedMonth.month);
+
+    if ((momentDisplayed.isSame(startDate, 'month') && (modification.year < 0 || modification.month < 0))
+      || (momentDisplayed.isSame(endDate, 'month') && (modification.year > 0 || modification.month > 0))) {
       return false;
     }
 
     if (index === 0) {
-      // first element has no predecessor, so only check distance to successor
+      // first element has no predecessor only check distance to successor
+      if (modification.year > 0) {
+        return this.calcDistanceToSuccessor(index, modification) > -11;
+      }
       return this.calcDistanceToSuccessor(index, modification) > 0;
     } else if (index >= displayedMonths.length - 1) {
-      // last element has no successor, so only check distance to predecessor
-      return this.calcDistanceToPredecessor(index, modification) > 0;
+      // last element has no successor only check distance to predecessor
+      if (modification.year >= 0) {
+        return this.calcDistanceToPredecessor(index, modification) > 0;
+      }
+      return this.calcDistanceToPredecessor(index, modification) > -11;
     }
     // for every other element check both distances
     return this.calcDistanceToPredecessor(index, modification) > 0
@@ -336,7 +354,7 @@ export default class DatePicker extends Component {
       temporaryStart,
     } = this.state;
 
-    const { startDate, endDate } = this.props;
+    const { startDate, endDate, format } = this.props;
 
     return <div className="date-picker">
       {calendar.length > 0
@@ -344,9 +362,9 @@ export default class DatePicker extends Component {
           <CalendarWithNavigation
             allowModification={this.isModificationAllowed.bind(this)}
             endDate={endDate}
+            format={format}
             hoverHandler={this.hoverHandler.bind(this)}
             index={index}
-            isValidHandler={this.isValidDate.bind(this)}
             key={index}
             month={calendar
               .filter(x => x.year === selectedMonth.year)[0].months

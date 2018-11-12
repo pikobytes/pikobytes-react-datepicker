@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 export default class Calendar extends Component {
   static propTypes = {
     endDate: PropTypes.object, // moment
+    format: PropTypes.string,
     hoverHandler: PropTypes.func,
     month: PropTypes.shape({
       month: PropTypes.number,
@@ -37,7 +38,7 @@ export default class Calendar extends Component {
       return true;
     }
 
-    if (typeof end === 'undefined') {
+    if (end === undefined) {
       return false;
     }
 
@@ -53,7 +54,7 @@ export default class Calendar extends Component {
     const { selectionEnd, selectionStart, temporaryEnd, temporaryStart } = this.props;
 
     // if no selection is in progress, do not render an onMouseOver handler, because it is not needed
-    return typeof selectionStart === 'undefined' || (typeof selectionEnd !== 'undefined')
+    return selectionStart === undefined || selectionEnd !== undefined
       ? <td key={`${day.year()}.${day.month()}.${day.date()}`}
         className={`day ${Calendar.determineSelection(day, selectionEnd, selectionStart)
           ? 'is-selected'
@@ -85,7 +86,7 @@ export default class Calendar extends Component {
   renderDay(day) {
     const { endDate, month, startDate } = this.props;
     // check whether the day actually belongs to this month
-    return (day.isAfter(startDate) && day.isBefore(endDate)) && day.month() === month.month
+    return (day.isSameOrAfter(startDate) && day.isSameOrBefore(endDate)) && day.month() === month.month
       ? this.renderDayWithHandlers(day)
       : <td key={`${day.year()}.${day.month()}.${day.date()}`}
         className="inactive">
@@ -95,18 +96,13 @@ export default class Calendar extends Component {
 
 
   render() {
-    const { month } = this.props;
+    const { format, month } = this.props;
 
     return <table className='table'>
       <thead>
         <tr>
-          <th>m</th>
-          <th>t</th>
-          <th>w</th>
-          <th>t</th>
-          <th>f</th>
-          <th>s</th>
-          <th>s</th>
+          {month.weeks[0].days.map(day =>
+            <th key={day.format(format)}>{day.format(format)}</th>)}
         </tr>
       </thead>
       <tbody>
