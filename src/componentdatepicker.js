@@ -97,6 +97,7 @@ export default class DatePicker extends Component {
     endDate: propTypes.object, // moment
     format: propTypes.string,
     numberOfCalendars: propTypes.number,
+    reportChanges: propTypes.func.isRequired,
     selectionStart: propTypes.object, // moment
     selectionEnd: propTypes.object, // moment
     startDate: propTypes.object, // moment
@@ -115,8 +116,9 @@ export default class DatePicker extends Component {
     super(props);
     this.state = {
       calendar: [],
-      displayError: false,
+      drawFromState: false,
       displayedMonths: [],
+      hasUnreportedChanges: false,
       selectionStart: props.selectionStart,
       selectionEnd: props.selectionEnd,
       selectionHandler: this.selectionStartHandler,
@@ -307,12 +309,38 @@ export default class DatePicker extends Component {
     });
   }
 
+  componentDidUpdate(prevProps) {
+    const { reportChanges, selectionStart, selectionEnd } = this.props;
+    const { hasUnreportedChanges } = this.state;
+    let newState = {};
+
+    // check whether a new selection is passed in as prop, if that is the case do not draw the selection stored in state
+    // and reset the state
+    if (prevProps.selectionStart !== selectionStart && prevProps.selectionEnd !== selectionEnd) {
+      newState = Object.assign(newState, {
+        drawFromState: false,
+        selectionHandler: this.selectionStartHandler,
+        selectionStart: undefined,
+        selectionEnd: undefined });
+    }
+
+    // if there is a selection, which has not been reported report it
+    if (hasUnreportedChanges) {
+      reportChanges([this.state.selectionStart, this.state.selectionEnd]);
+      newState = Object.assign(newState, { hasUnreportedChanges: false });
+    }
+
+    if (Object.keys(newState).length !== 0) {
+      this.setState(newState);
+    }
+  }
   /**
    * sets the startDate of a selection and changes the selectionHandler to the selectionEndHandler
    * @param {moment} date which should be selected startDate
    */
   selectionStartHandler(date) {
     const newState = {
+      drawFromState: true,
       selectionStart: date,
       selectionEnd: undefined,
       selectionHandler: this.selectionEndHandler,
@@ -333,6 +361,7 @@ export default class DatePicker extends Component {
     const { selectionStart } = this.state;
 
     const newState = {
+      hasUnreportedChanges: true,
       selectionHandler: this.selectionStartHandler,
       temporaryEnd: undefined,
       temporaryStart: undefined,
@@ -367,6 +396,7 @@ export default class DatePicker extends Component {
   render() {
     const {
       calendar,
+      drawFromState,
       displayedMonths,
       selectionStart,
       selectionEnd,
@@ -394,8 +424,8 @@ export default class DatePicker extends Component {
             monthSelection={selectedMonth}
             monthSelectionHandler={this.modifyCalendarMonth.bind(this)}
             selectionHandler={selectionHandler.bind(this)}
-            selectionStart={selectionStart}
-            selectionEnd={selectionEnd}
+            selectionStart={drawFromState ? selectionStart : this.props.selectionStart}
+            selectionEnd={drawFromState ? selectionEnd : this.props.selectionEnd}
             startDate={startDate}
             temporaryStart={temporaryStart}
             temporaryEnd={temporaryEnd}/>)

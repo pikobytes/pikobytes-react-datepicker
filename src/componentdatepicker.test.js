@@ -9,7 +9,8 @@ describe('componendatepicker.js', () => {
   it('renders without crashing', () => {
     wrapper = mount(<DatePicker format="DD"
       startDate={moment('2000-01-01 00+00:00')}
-      endDate={moment('2001-12-31 00+00:00')}/>);
+      endDate={moment('2001-12-31 00+00:00')}
+      reportChanges={x => x}/>);
   });
 
   it('generates an array with exactly 7 days', () => {

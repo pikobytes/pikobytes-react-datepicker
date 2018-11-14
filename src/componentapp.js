@@ -13,7 +13,8 @@ export default class App extends Component {
   render() {
     return <div className="container template-app">
       <DatePicker startDate={moment('2000-01-01 00+00:00')}
-        endDate={moment('2003-12-31 00+00:00')}/>
+        endDate={moment('2003-12-31 00+00:00')}
+        reportChanges={x => x}/>
     </div>;
   }
 }
