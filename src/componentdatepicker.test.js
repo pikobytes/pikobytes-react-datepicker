@@ -5,14 +5,6 @@ import moment from 'moment';
 import DatePicker, { generateDays } from './componentdatepicker';
 
 describe('componendatepicker.js', () => {
-  let wrapper;
-  it('renders without crashing', () => {
-    wrapper = mount(<DatePicker format="DD"
-      startDate={moment('2000-01-01 00+00:00')}
-      endDate={moment('2001-12-31 00+00:00')}
-      reportChanges={x => x}/>);
-  });
-
   it('generates an array with exactly 7 days', () => {
     const days = generateDays(2000, 0, 1);
     expect(days.length).toEqual(7);
@@ -21,6 +13,15 @@ describe('componendatepicker.js', () => {
     expect(days[6].month()).toEqual(0);
     expect(days[5].date()).toEqual(1);
   });
+
+  let wrapper;
+  it('renders without crashing', () => {
+    wrapper = mount(<DatePicker format="DD"
+      startDate={moment('2000-01-01 00+00:00')}
+      endDate={moment('2001-12-31 00+00:00')}
+      reportChanges={x => x}/>);
+  });
+
   it('two navigation buttons should be blocked, because the first month gets selected', () => {
     expect(wrapper.find('.blocked').length).toEqual(2);
   });
@@ -30,5 +31,15 @@ describe('componendatepicker.js', () => {
     expect(wrapper.find('p').at(1).text()).toEqual('Jan');
     button.simulate('click');
     expect(wrapper.find('p').at(1).text()).toEqual('Feb');
+  });
+
+  it('actually renders the number of specified calendars', () => {
+    wrapper = mount(<DatePicker format="DD"
+      numberOfCalendars={4}
+      startDate={moment('2000-01-01 00+00:00')}
+      endDate={moment('2006-12-31 00+00:00')}
+      reportChanges={x => x}/>);
+
+    expect(wrapper.find('.calendar-container').length).toEqual(4);
   });
 });

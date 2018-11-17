@@ -92,6 +92,27 @@ export function generateCalendar(startDate, endDate) {
   return calendar;
 }
 
+/**
+ *  calculates the distance of a month to another month
+ * @param {{
+ *   year: number,
+ *   month: number
+ * }} firstMonth identified by year and month
+ * @param {{
+ *   year: number,
+ *   month: number
+ * }} secondMonth identified by year and month
+ * @returns {number} of months between the month with applied modification and its successor, 1 if adjacent months, 0 if same months
+ */
+function calcDistance(firstMonth, secondMonth) {
+  return Math.abs(moment(INITDATE).year(firstMonth.year)
+    .month(firstMonth.month)
+    .utc()
+    .diff(moment(INITDATE)
+      .year(secondMonth.year)
+      .month(secondMonth.month), 'months', true));
+}
+
 export default class DatePicker extends Component {
   static propTypes = {
     endDate: propTypes.object, // moment
@@ -197,50 +218,6 @@ export default class DatePicker extends Component {
   }
 
   /**
-   * calculates the distance of a month with applied modification to its predecessor in displayedMonths array
-   * @param index of the month, which should be checked, in the displayedMonths array
-   * @param {{
-   *   year: number,
-   *   month: number,
-   * }} modification which should be applied
-   * @returns {number} of months between the month with applied modification and its predecessor
-   */
-  calcDistanceToPredecessor(index, modification) {
-    const { displayedMonths } = this.state;
-    const currentMonth = displayedMonths[index];
-    const predecessor = displayedMonths[index - 1];
-
-    return moment(INITDATE).year(currentMonth.year + modification.year)
-      .month(currentMonth.month + modification.month)
-      .utc()
-      .diff(moment(INITDATE)
-        .year(predecessor.year)
-        .month(predecessor.month), 'months', true);
-  }
-
-  /**
-   *  calculates the distance of a month with applied modification to its successor in displayedMonths array
-   * @param index of the month, which should be checked, in the displayedMonths array
-   * @param {{
-   *   year: number,
-   *   month: number
-   * }} modification which should be applied
-   * @returns {number} of months between the month with applied modification and its successor
-   */
-  calcDistanceToSuccessor(index, modification) {
-    const { displayedMonths } = this.state;
-    const currentMonth = displayedMonths[index];
-    const successor = displayedMonths[index + 1];
-
-    return moment(INITDATE).year(successor.year)
-      .month(successor.month)
-      .utc()
-      .diff(moment(INITDATE)
-        .year(currentMonth.year + modification.year)
-        .month(currentMonth.month + modification.month), 'months', true);
-  }
-
-  /**
    * checks if the modification for a certain month should be blocked
    * @param index of the month, which should be checked, in the displayedMonths array
    * @param {{
@@ -249,44 +226,29 @@ export default class DatePicker extends Component {
    * }} modification which should be applied
    * @returns {boolean} whether the modification is allowed or not
    */
-  // TODO: REWORK THE MESS
+
   isModificationAllowed(index, modification) {
     const { displayedMonths } = this.state;
     const { endDate, startDate } = this.props;
     const displayedMonth = displayedMonths[index];
 
-    const momentDisplayed = moment(INITDATE).year(displayedMonth.year).month(displayedMonth.month);
+    const momentDisplayed = moment(INITDATE)
+      .year(displayedMonth.year)
+      .month(displayedMonth.month);
 
-    if ((momentDisplayed.isSame(startDate, 'month') && (modification.year < 0 || modification.month < 0))
-      || (momentDisplayed.isSame(endDate, 'month') && (modification.year > 0 || modification.month > 0))) {
-      return false;
+    // for modifications forwards in time check the successor or the endDate of the range, when there is no successor
+    if (modification.year > 0 || modification.month > 0) {
+      if (index >= displayedMonths.length - 1) {
+        return endDate.isAfter(momentDisplayed, 'month');
+      }
+      return calcDistance(displayedMonth, displayedMonths[index + 1]) > 1;
     }
 
-
-    //  -11 is due to the months in a year, if its more than a year difference
+    // for modifications backwards in time check the predecessor or the startDate of the range, when there is no predecessor
     if (index === 0) {
-      // first element has no predecessor only check distance to successor
-      if (modification.year > 0) {
-        return this.calcDistanceToSuccessor(index, modification) > -11;
-      }
-      return this.calcDistanceToSuccessor(index, modification) > 0;
-    } else if (index >= displayedMonths.length - 1) {
-      // last element has no successor only check distance to predecessor
-      if (modification.year >= 0) {
-        return this.calcDistanceToPredecessor(index, modification) > 0;
-      }
-      return this.calcDistanceToPredecessor(index, modification) > -11;
+      return startDate.isBefore(momentDisplayed, 'month');
     }
-    // for every other element check both distances
-    if (modification.year > 0) {
-      return this.calcDistanceToPredecessor(index, modification) > 0
-      && this.calcDistanceToSuccessor(index, modification) > -11;
-    } else if (modification.year === 0) {
-      return this.calcDistanceToPredecessor(index, modification) > 0
-        && this.calcDistanceToSuccessor(index, modification) > 0;
-    }
-    return this.calcDistanceToPredecessor(index, modification) > -11
-        && this.calcDistanceToSuccessor(index, modification) > 0;
+    return calcDistance(displayedMonth, displayedMonths[index - 1]) > 1;
   }
 
   /**
