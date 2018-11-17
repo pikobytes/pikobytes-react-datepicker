@@ -104,7 +104,7 @@ export function generateCalendar(startDate, endDate) {
  * }} secondMonth identified by year and month
  * @returns {number} of months between the month with applied modification and its successor, 1 if adjacent months, 0 if same months
  */
-function calcDistance(firstMonth, secondMonth) {
+export function calcDistance(firstMonth, secondMonth) {
   return Math.abs(moment(INITDATE).year(firstMonth.year)
     .month(firstMonth.month)
     .utc()

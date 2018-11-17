@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment';
 
-import DatePicker, { generateDays } from './componentdatepicker';
+import DatePicker, { generateDays, calcDistance } from './componentdatepicker';
 
 describe('componendatepicker.js', () => {
   it('generates an array with exactly 7 days', () => {
@@ -13,6 +13,14 @@ describe('componendatepicker.js', () => {
     expect(days[6].month()).toEqual(0);
     expect(days[5].date()).toEqual(1);
   });
+
+  it('calculates distances correctly', () => {
+    expect(calcDistance({ year: 2015, month: 0 }, { year: 2015, month: 1 })).toEqual(1);
+    expect(calcDistance({ year: 2015, month: 1 }, { year: 2015, month: 0 })).toEqual(1);
+    expect(calcDistance({ year: 2014, month: 0 }, { year: 2015, month: 1 })).toEqual(13);
+    expect(calcDistance({ year: 2015, month: 1 }, { year: 2014, month: 0 })).toEqual(13);
+  });
+
 
   let wrapper;
   it('renders without crashing', () => {
@@ -32,6 +40,7 @@ describe('componendatepicker.js', () => {
     button.simulate('click');
     expect(wrapper.find('p').at(1).text()).toEqual('Feb');
   });
+
 
   it('actually renders the number of specified calendars', () => {
     wrapper = mount(<DatePicker format="DD"
