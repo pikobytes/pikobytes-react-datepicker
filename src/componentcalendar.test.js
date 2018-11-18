@@ -4,11 +4,11 @@ import { shallow } from 'enzyme';
 import moment from 'moment';
 
 import Calendar from './componentcalendar';
-import { buildCalendarYear } from './componentdatepicker';
+import { buildCalendarMonth } from './componentmonthprovider';
 
 describe('componentcalendar.js', () => {
   it('renders without crashing', () => {
-    shallow(<Calendar month={buildCalendarYear(2012)[0]}/>);
+    shallow(<Calendar month={buildCalendarMonth(2012, 0)}/>);
   });
 
   it('date between start and end should be marked as selected', () => {

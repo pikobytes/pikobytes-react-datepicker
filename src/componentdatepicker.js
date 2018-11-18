@@ -2,95 +2,10 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import propTypes from 'prop-types';
 import CalendarWithNavigation from './componentcalendarwithnavigation';
+import MonthProvider from './componentmonthprovider';
 import './componentdatepicker.css';
 
 const INITDATE = '1990-02-01 00+00:00';
-
-/**
- * generates an array of size 7, representing a single week
- * @param {number} year - for which the week should be generated
- * @param {number} month - for which the week should be generated
- * @param {number} week - the concrete week which should be generated
- * @returns {moment.Moment[]} array of size 7, representing a week
- */
-export function generateDays(year, month, week) {
-  return Array(7).fill(0).map((n, i) => moment(INITDATE)
-    .year(year)
-    .month(month)
-    .week(week)
-    .utc()
-    .startOf('week')
-    .clone()
-    .add(n + (i + 1), 'day'));
-}
-
-/**
- * builds a calendar for the specified year
- * @param {number} year for which the calendar should be generated
- * @returns {Array} containing all months of a year
- */
-export function buildCalendarYear(year) {
-  const months = [];
-  for (let month = 0; month <= 11; month++) {
-    const nextMonth = {
-      month: month,
-      weeks: {},
-    };
-
-    // subtract is needed for the shift from sunday to monday as first day of the week
-    let startWeek = moment(INITDATE).year(year).month(month)
-      .startOf('month')
-      .startOf('week')
-      .week();
-    let endWeek = moment().year(year).month(month).utc()
-      .endOf('month')
-      .startOf('week')
-      .week();
-
-    const weeks = [];
-
-    // due to the shift from sunday to monday as first day of the week, as it is more common in europe,
-    // the year might start with the 53th week. If that happens, we will just generate this week manually
-    if (startWeek === 53) {
-      startWeek = 1;
-      weeks.push({ week: 53, days: generateDays(year - 1, 0, 53) });
-    }
-
-    // the week containing january the first is handled as the first week of the next year
-    if (endWeek === 1) {
-      endWeek = 53;
-    }
-
-    for (let week = startWeek; week <= endWeek; week++) {
-      weeks.push({
-        week: week,
-        days: generateDays(year, month, week),
-      });
-    }
-
-    nextMonth.weeks = weeks;
-    months.push(nextMonth);
-  }
-  return months;
-}
-
-/**
- * generates a whole calendar, with every year and month between start and end Date
- * @param startDate of the generated calendar
- * @param endDate of the generated calendar
- * @returns {Array} of year-objects
- */
-export function generateCalendar(startDate, endDate) {
-  const calendar = [];
-
-  for (let year = startDate.year(); year <= endDate.year(); year++) {
-    calendar.push({
-      year: year,
-      months: buildCalendarYear(year),
-    });
-  }
-  return calendar;
-}
 
 /**
  *  calculates the distance of a month to another month
@@ -136,7 +51,6 @@ export default class DatePicker extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      calendar: [],
       drawFromState: false,
       displayedMonths: [],
       hasUnreportedChanges: false,
@@ -255,8 +169,8 @@ export default class DatePicker extends Component {
    * generate the calendar associated with the specified range
    */
   componentDidMount() {
-    const { startDate, numberOfCalendars, endDate } = this.props;
-    const calendar = generateCalendar(startDate, endDate);
+    const { startDate, numberOfCalendars } = this.props;
+
     const displayedMonths = [];
     for (let iterations = 0; iterations < numberOfCalendars; iterations++) {
       displayedMonths.push({
@@ -266,7 +180,6 @@ export default class DatePicker extends Component {
     }
 
     this.setState({
-      calendar: calendar,
       displayedMonths: displayedMonths,
     });
   }
@@ -292,10 +205,14 @@ export default class DatePicker extends Component {
       newState = Object.assign(newState, { hasUnreportedChanges: false });
     }
 
+    // do not set state if its empty, to not get caught in endless update loop,
+    // that's a weird way to fix the problem, but it solved the unnecessary second re-render, when setState is called twice (even though,
+    // they should be ideally batched together by react?)
     if (Object.keys(newState).length !== 0) {
       this.setState(newState);
     }
   }
+
   /**
    * sets the startDate of a selection and changes the selectionHandler to the selectionEndHandler
    * @param {moment} date which should be selected startDate
@@ -346,9 +263,7 @@ export default class DatePicker extends Component {
   hoverHandler(date) {
     const { selectionStart } = this.state;
 
-    if (this.state.selectionHandler === this.selectionStartHandler) {
-      this.setState({ temporaryStart: date, temporaryEnd: date });
-    } else if (date.isBefore(selectionStart)) {
+    if (date.isBefore(selectionStart)) {
       this.setState({ temporaryStart: date, temporaryEnd: selectionStart });
     } else {
       this.setState({ temporaryStart: selectionStart, temporaryEnd: date });
@@ -357,7 +272,6 @@ export default class DatePicker extends Component {
 
   render() {
     const {
-      calendar,
       drawFromState,
       displayedMonths,
       selectionStart,
@@ -371,18 +285,16 @@ export default class DatePicker extends Component {
     const { startDate, endDate, format } = this.props;
 
     return <div className="date-picker">
-      {calendar.length > 0
-        ? displayedMonths.map((selectedMonth, index) =>
-          <CalendarWithNavigation
+      {
+        displayedMonths.map((selectedMonth, index) => {
+          const CalendarWithMonth = MonthProvider(CalendarWithNavigation);
+          return <CalendarWithMonth
             allowModification={this.isModificationAllowed.bind(this)}
             endDate={endDate}
             format={format}
             hoverHandler={this.hoverHandler.bind(this)}
             index={index}
             key={index}
-            month={calendar
-              .filter(x => x.year === selectedMonth.year)[0].months
-              .filter(y => y.month === selectedMonth.month)[0]}
             monthSelection={selectedMonth}
             monthSelectionHandler={this.modifyCalendarMonth.bind(this)}
             selectionHandler={selectionHandler.bind(this)}
@@ -390,8 +302,9 @@ export default class DatePicker extends Component {
             selectionEnd={drawFromState ? selectionEnd : this.props.selectionEnd}
             startDate={startDate}
             temporaryStart={temporaryStart}
-            temporaryEnd={temporaryEnd}/>)
-        : 'no cal'}
+            temporaryEnd={temporaryEnd} />;
+        })
+      }
     </div>;
   }
 }

@@ -2,18 +2,9 @@ import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment';
 
-import DatePicker, { generateDays, calcDistance } from './componentdatepicker';
+import DatePicker, { calcDistance } from './componentdatepicker';
 
 describe('componendatepicker.js', () => {
-  it('generates an array with exactly 7 days', () => {
-    const days = generateDays(2000, 0, 1);
-    expect(days.length).toEqual(7);
-    // first few days could be in december
-    expect(days[6].year()).toEqual(2000);
-    expect(days[6].month()).toEqual(0);
-    expect(days[5].date()).toEqual(1);
-  });
-
   it('calculates distances correctly', () => {
     expect(calcDistance({ year: 2015, month: 0 }, { year: 2015, month: 1 })).toEqual(1);
     expect(calcDistance({ year: 2015, month: 1 }, { year: 2015, month: 0 })).toEqual(1);
