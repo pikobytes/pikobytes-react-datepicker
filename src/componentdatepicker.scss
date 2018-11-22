@@ -6,8 +6,20 @@
   .date-picker{
     flex-direction: column;
     .calendar-container{
-      margin: 20px 4px 4px 4px;
+      margin: 4px 4px 4px 4px;
       width: 95%;
+      .table{
+        line-height: 0.5;
+      }
+
+      .modification-row{
+        margin-top: 2px;
+      }
+
+      .button {
+        height: 20px;
+      }
+
     }
   }
 }
@@ -16,7 +28,6 @@
   .date-picker{
 
     .calendar-container{
-      margin: 20px 4px 4px 4px;
       width: 90%;
       font-size: 12px;
     }
@@ -27,7 +38,6 @@
   .date-picker{
 
     .calendar-container{
-      margin: 20px 4px 4px 4px;
       width: 80%;
       font-size: 12px;
     }

@@ -51,7 +51,8 @@ export default class DatePicker extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      drawFromState: false,
+      drawFromState: (props.selectionStart === undefined &&
+      props.selectionEnd === undefined),
       displayedMonths: [],
       hasUnreportedChanges: false,
       selectionStart: props.selectionStart,
@@ -140,7 +141,6 @@ export default class DatePicker extends Component {
    * }} modification which should be applied
    * @returns {boolean} whether the modification is allowed or not
    */
-
   isModificationAllowed(index, modification) {
     const { displayedMonths } = this.state;
     const { endDate, startDate } = this.props;

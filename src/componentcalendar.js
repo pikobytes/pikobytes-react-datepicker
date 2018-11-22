@@ -19,12 +19,21 @@ export default class Calendar extends Component {
   };
 
   // wrappers around the handlers passed in as props to keep the this contexts, while still being able to bind the dates to them later on
+  /**
+   * if passed in, calls selectionHandler prop
+   * @param {moment} date which should be selected
+   */
   selectionHandler(date) {
     const { selectionHandler } = this.props;
     if (selectionHandler !== undefined) {
       selectionHandler(date);
     }
   }
+
+  /**
+   * if passed in, calls hoverHandler prop
+   * @param {moment} date which should be selected
+   */
   hoverHandler(date) {
     const { hoverHandler } = this.props;
     if (hoverHandler !== undefined) {
@@ -77,10 +86,13 @@ export default class Calendar extends Component {
         className={`day ${Calendar.determineSelection(day, temporaryEnd, temporaryStart)
           ? 'will-be-selected'
           : ''} ${(day.isSame(temporaryEnd, 'day') || day.isSame(temporaryStart, 'day'))
+        || (day.isSame(selectionEnd, 'day') || day.isSame(selectionStart, 'day'))
           ? 'is-selected-border'
           : ''}`}
         onClick={this.selectionHandler.bind(this, day)}
-        onMouseOver={this.hoverHandler.bind(this, day)}>
+        onMouseOver={(day.isSame(temporaryStart, 'day') || day.isSame(temporaryEnd, 'day'))
+          ? undefined
+          : this.hoverHandler.bind(this, day) }>
         {day.format('D')}
       </td>;
   }
