@@ -11,7 +11,7 @@ const INITDATE = '1990-02-01 00+00:00';
  * @returns {moment.Moment[]} array of size 7, representing a week
  */
 export function generateDays(year, month, week) {
-  return Array(7).fill(0).map((n, i) => moment(INITDATE)
+  return Array(7).fill(0).map((n, i) => moment.utc(INITDATE)
     .year(year)
     .month(month)
     .week(week)
@@ -32,11 +32,11 @@ export function generateDays(year, month, week) {
  */
 export function buildCalendarMonth(year, month) {
   // subtract is needed for the shift from sunday to monday as first day of the week
-  let startWeek = moment(INITDATE).year(year).month(month)
+  let startWeek = moment.utc(INITDATE).year(year).month(month)
     .startOf('month')
     .startOf('week')
     .week();
-  let endWeek = moment().year(year).month(month).utc()
+  let endWeek = moment.utc().year(year).month(month).utc()
     .endOf('month')
     .startOf('week')
     .week();

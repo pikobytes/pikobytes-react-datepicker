@@ -20,12 +20,37 @@ const INITDATE = '1990-02-01 00+00:00';
  * @returns {number} of months between the month with applied modification and its successor, 1 if adjacent months, 0 if same months
  */
 export function calcDistance(firstMonth, secondMonth) {
-  return Math.abs(moment(INITDATE).year(firstMonth.year)
+  return Math.abs(moment.utc(INITDATE).year(firstMonth.year)
     .month(firstMonth.month)
     .utc()
-    .diff(moment(INITDATE)
+    .diff(moment.utc(INITDATE)
       .year(secondMonth.year)
       .month(secondMonth.month), 'months', true));
+}
+
+function calcDisplayedMonths(numberOfCalendars, timeExtent) {
+  const [start, end] = timeExtent;
+  const distance = calcDistance(
+    { month: start.month(), year: start.year() },
+    { month: end.month(), year: end.year() });
+  const displayedMonths = [];
+
+  if (distance < (numberOfCalendars - 1)) {
+    return displayedMonths;
+  }
+
+  const distancePerCalendar = Math.round(distance / (numberOfCalendars - 1));
+
+  for (let i = 0; i < numberOfCalendars; i++) {
+    const month = start.month() + (distancePerCalendar * i);
+    const carry = Math.floor(month / 12);
+    displayedMonths.push({
+      month: month % 12,
+      year: start.year() + carry,
+    });
+  }
+
+  return displayedMonths;
 }
 
 export default class DatePicker extends Component {
@@ -40,12 +65,12 @@ export default class DatePicker extends Component {
   };
 
   static defaultProps = {
-    endDate: moment('2000-06-18 00+00:00'),
+    endDate: moment.utc('2000-06-18 00+00:00'),
     format: 'dd',
     numberOfCalendars: 2,
     selectionStart: undefined,
     selectionEnd: undefined,
-    startDate: moment('1990-01-18 00+00:00'),
+    startDate: moment.utc('1990-01-18 00+00:00'),
   };
 
   constructor(props) {
@@ -53,13 +78,26 @@ export default class DatePicker extends Component {
     this.state = {
       drawFromState: (props.selectionStart === undefined &&
       props.selectionEnd === undefined),
-      displayedMonths: [],
+      displayedMonths: this.determineFocus(),
       selectionStart: props.selectionStart,
       selectionEnd: props.selectionEnd,
       selectionHandler: this.selectionStartHandler,
       temporaryEnd: undefined,
       temporaryStart: undefined,
     };
+  }
+
+  determineFocus() {
+    const { numberOfCalendars, selectionStart, selectionEnd, startDate, endDate } = this.props;
+    const displayedMonths = [];
+    if ((numberOfCalendars === 2) && (selectionStart !== undefined && selectionEnd !== undefined)) {
+      displayedMonths.push({ year: selectionStart.year(), month: selectionStart.month() });
+      displayedMonths.push({ year: selectionEnd.year(), month: selectionEnd.month() });
+    } else {
+      return calcDisplayedMonths(numberOfCalendars, [startDate, endDate]);
+    }
+
+    return displayedMonths;
   }
 
   /**
@@ -78,10 +116,10 @@ export default class DatePicker extends Component {
     let newYear = oldDisplayedMonth.year + modification.year;
 
     const compareTo = displayedMonths[index + modification.year];
-    const momentNew = moment(INITDATE).year(newYear).month(newMonth);
+    const momentNew = moment.utc(INITDATE).year(newYear).month(newMonth);
 
     if (compareTo !== undefined) {
-      const momentCompareTo = moment(INITDATE).year(compareTo.year).month(compareTo.month);
+      const momentCompareTo = moment.utc(INITDATE).year(compareTo.year).month(compareTo.month);
       if (modification.year === 1) {
         if (momentCompareTo.isSameOrBefore(momentNew)) {
           newYear = compareTo.year;
@@ -145,7 +183,7 @@ export default class DatePicker extends Component {
     const { endDate, startDate } = this.props;
     const displayedMonth = displayedMonths[index];
 
-    const momentDisplayed = moment(INITDATE)
+    const momentDisplayed = moment.utc(INITDATE)
       .year(displayedMonth.year)
       .month(displayedMonth.month);
 
@@ -164,25 +202,6 @@ export default class DatePicker extends Component {
     return calcDistance(displayedMonth, displayedMonths[index - 1]) > 1;
   }
 
-  /**
-   * generate the calendar associated with the specified range
-   */
-  componentDidMount() {
-    const { startDate, numberOfCalendars } = this.props;
-
-    const displayedMonths = [];
-    for (let iterations = 0; iterations < numberOfCalendars; iterations++) {
-      displayedMonths.push({
-        year: startDate.year() + iterations,
-        month: startDate.month(),
-      });
-    }
-
-    this.setState({
-      displayedMonths: displayedMonths,
-    });
-  }
-
   componentDidUpdate(prevProps) {
     const { selectionStart, selectionEnd } = this.props;
     // check whether a new selection is passed in as prop, if that is the case do not draw the selection stored in state
@@ -198,6 +217,7 @@ export default class DatePicker extends Component {
       || (prevProps.selectionEnd === undefined && selectionEnd !== undefined)
       || (!prevProps.selectionStart.isSame(selectionStart) && !prevProps.selectionEnd.isSame(selectionEnd))) {
       this.setState({
+        displayedMonths: this.determineFocus(),
         drawFromState: false,
         selectionHandler: this.selectionStartHandler,
         selectionStart: undefined,
@@ -283,7 +303,6 @@ export default class DatePicker extends Component {
 
 
     const { startDate, endDate, format } = this.props;
-
     return <div className="date-picker">
       {
         displayedMonths.map((selectedMonth, index) => {

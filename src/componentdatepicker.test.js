@@ -21,8 +21,8 @@ describe('componendatepicker.js', () => {
       reportChanges={x => x}/>);
   });
 
-  it('two navigation buttons should be blocked, because the first month gets selected', () => {
-    expect(wrapper.find('.blocked').length).toEqual(2);
+  it('four navigation buttons should be blocked, because the first month and the last month gets selected', () => {
+    expect(wrapper.find('.blocked').length).toEqual(4);
   });
 
   it('button click (4. button) should increment the month of first calendar', () => {
@@ -36,8 +36,8 @@ describe('componendatepicker.js', () => {
   it('actually renders the number of specified calendars', () => {
     wrapper = mount(<DatePicker format="DD"
       numberOfCalendars={4}
-      startDate={moment('2000-01-01 00+00:00')}
-      endDate={moment('2006-12-31 00+00:00')}
+      startDate={moment.utc('2000-01-01 00+00:00')}
+      endDate={moment.utc('2006-12-31 00+00:00')}
       reportChanges={x => x}/>);
 
     expect(wrapper.find('.calendar-container').length).toEqual(4);

@@ -82,7 +82,7 @@ export default class CalendarWithNavigation extends Component {
             {x.map(modification =>
               (modification.year === undefined
                 ? <p key={modification.text}>
-                  {moment('1990-02-01 00+00:00')
+                  {moment.utc('1990-02-01 00+00:00')
                     .month(monthSelection.month)
                     .year(monthSelection.year)
                     .format(modification.format)}
