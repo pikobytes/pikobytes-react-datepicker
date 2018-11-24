@@ -54,7 +54,6 @@ export default class DatePicker extends Component {
       drawFromState: (props.selectionStart === undefined &&
       props.selectionEnd === undefined),
       displayedMonths: [],
-      hasUnreportedChanges: false,
       selectionStart: props.selectionStart,
       selectionEnd: props.selectionEnd,
       selectionHandler: this.selectionStartHandler,
@@ -185,31 +184,15 @@ export default class DatePicker extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { reportChanges, selectionStart, selectionEnd } = this.props;
-    const { hasUnreportedChanges } = this.state;
-    let newState = {};
-
+    const { selectionStart, selectionEnd } = this.props;
     // check whether a new selection is passed in as prop, if that is the case do not draw the selection stored in state
     // and reset the state
-    if (prevProps.selectionStart !== selectionStart && prevProps.selectionEnd !== selectionEnd) {
-      newState = Object.assign(newState, {
+    if (!prevProps.selectionStart.isSame(selectionStart) && !prevProps.selectionEnd.isSame(selectionEnd)) {
+      this.setState({
         drawFromState: false,
         selectionHandler: this.selectionStartHandler,
         selectionStart: undefined,
         selectionEnd: undefined });
-    }
-
-    // if there is a selection, which has not been reported report it
-    if (hasUnreportedChanges) {
-      reportChanges([this.state.selectionStart, this.state.selectionEnd]);
-      newState = Object.assign(newState, { hasUnreportedChanges: false });
-    }
-
-    // do not set state if its empty, to not get caught in endless update loop,
-    // that's a weird way to fix the problem, but it solved the unnecessary second re-render, when setState is called twice (even though,
-    // they should be ideally batched together by react?)
-    if (Object.keys(newState).length !== 0) {
-      this.setState(newState);
     }
   }
 
@@ -225,11 +208,15 @@ export default class DatePicker extends Component {
       selectionHandler: this.selectionEndHandler,
     };
 
+    const { reportChanges } = this.props;
+
     this.setState(
       this.state.selectionEnd === date
         ? Object.assign(newState, { temporaryStart: date })
         : newState,
     );
+
+    reportChanges([newState.selectionStart, undefined]);
   }
 
   /**
@@ -238,6 +225,8 @@ export default class DatePicker extends Component {
    */
   selectionEndHandler(date) {
     const { selectionStart } = this.state;
+
+    const { reportChanges } = this.props;
 
     const newState = {
       hasUnreportedChanges: true,
@@ -250,10 +239,12 @@ export default class DatePicker extends Component {
       newState.selectionStart = date;
       newState.selectionEnd = selectionStart;
     } else {
+      newState.selectionStart = selectionStart;
       newState.selectionEnd = date;
     }
 
     this.setState(newState);
+    reportChanges([newState.selectionStart, newState.selectionEnd]);
   }
 
   /**
