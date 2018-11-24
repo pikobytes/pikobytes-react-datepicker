@@ -187,7 +187,16 @@ export default class DatePicker extends Component {
     const { selectionStart, selectionEnd } = this.props;
     // check whether a new selection is passed in as prop, if that is the case do not draw the selection stored in state
     // and reset the state
-    if (!prevProps.selectionStart.isSame(selectionStart) && !prevProps.selectionEnd.isSame(selectionEnd)) {
+    if (selectionStart === undefined &&
+      selectionEnd === undefined &&
+      prevProps.selectionStart === undefined &&
+      prevProps.selectionEnd === undefined) {
+      return;
+    }
+
+    if ((prevProps.selectionStart === undefined && selectionStart !== undefined)
+      || (prevProps.selectionEnd === undefined && selectionEnd !== undefined)
+      || (!prevProps.selectionStart.isSame(selectionStart) && !prevProps.selectionEnd.isSame(selectionEnd))) {
       this.setState({
         drawFromState: false,
         selectionHandler: this.selectionStartHandler,
