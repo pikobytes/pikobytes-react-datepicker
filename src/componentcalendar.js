@@ -84,7 +84,9 @@ export default class Calendar extends Component {
       : <td key={`${day.year()}.${day.month()}.${day.date()}`}
         className={`day ${Calendar.determineSelection(day, temporaryEnd, temporaryStart)
           ? 'will-be-selected'
-          : ''} ${(day.isSame(temporaryEnd, 'day') || day.isSame(temporaryStart, 'day')) || day.isSame(selectionStart, 'day')
+          : ''} ${((temporaryEnd !== undefined && day.isSame(temporaryEnd, 'day'))
+          || day.isSame(temporaryStart, 'day'))
+          || day.isSame(selectionStart, 'day')
           ? 'is-selected-border'
           : ''}`}
         onClick={this.selectionHandler.bind(this, day)}

@@ -254,6 +254,7 @@ export default class DatePicker extends Component {
       selectionStart: date,
       selectionEnd: undefined,
       selectionHandler: this.selectionEndHandler,
+      temporaryStart: date,
     };
 
     const { reportChanges } = this.props;
