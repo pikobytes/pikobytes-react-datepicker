@@ -8,9 +8,16 @@ import './componentdatepicker.css';
 const INITDATE = '1990-02-01 00+00:00';
 const CalendarWithMonth = MonthProvider(CalendarWithNavigation);
 
+/**
+ * mathematically correct modulo
+ * @param { number } n dividend
+ * @param { number } m divisor
+ * @returns {number} remainder
+ */
 function mod(n, m) {
   return ((n % m) + m) % m;
 }
+
 /**
  *  calculates the distance of a month to another month
  * @param {{
@@ -32,6 +39,12 @@ export function calcDistance(firstMonth, secondMonth) {
       .month(secondMonth.month), 'months', true));
 }
 
+/**
+ * calculates which Months will be displayed, from a given time extent and the number of calendars
+ * @param { number } numberOfCalendars
+ * @param {[moment, moment] }timeExtent
+ * @returns {Array}
+ */
 function calcDisplayedMonths(numberOfCalendars, timeExtent) {
   const [start, end] = timeExtent;
   const distance = calcDistance(
@@ -96,6 +109,13 @@ export default class DatePicker extends Component {
     };
   }
 
+  /**
+   * determines which months will be displayed
+   * @returns {[{
+   * year: number,
+   * month:number,
+   * }]}
+   */
   determineFocus() {
     const { numberOfCalendars, selectionStart, selectionEnd, startDate, endDate } = this.props;
     const displayedMonths = [];
@@ -234,9 +254,11 @@ export default class DatePicker extends Component {
 
     if ((prevProps.selectionStart === undefined && selectionStart !== undefined)
       || (prevProps.selectionEnd === undefined && selectionEnd !== undefined)
-      || (!prevProps.selectionStart.isSame(selectionStart) && !prevProps.selectionEnd.isSame(selectionEnd))) {
+      || (!prevProps.selectionStart.isSame(selectionStart, 'day') || !prevProps.selectionEnd.isSame(selectionEnd, 'day'))) {
       this.setState({
-        displayedMonths: this.determineFocus(),
+        displayedMonths: this.state.drawFromState
+          ? this.state.displayedMonths
+          : this.determineFocus(),
         drawFromState: false,
         selectionHandler: this.selectionStartHandler,
         selectionStart: undefined,
@@ -320,7 +342,6 @@ export default class DatePicker extends Component {
       temporaryEnd,
       temporaryStart,
     } = this.state;
-
 
     const { startDate, endDate, format } = this.props;
     return <div className="date-picker">
