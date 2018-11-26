@@ -7,6 +7,9 @@ import './componentdatepicker.css';
 
 const INITDATE = '1990-02-01 00+00:00';
 
+function mod(n, m) {
+  return ((n % m) + m) % m;
+}
 /**
  *  calculates the distance of a month to another month
  * @param {{
@@ -35,17 +38,22 @@ function calcDisplayedMonths(numberOfCalendars, timeExtent) {
     { month: end.month(), year: end.year() });
   const displayedMonths = [];
 
-  if (distance < (numberOfCalendars - 1)) {
-    return displayedMonths;
-  }
-
   const distancePerCalendar = Math.round(distance / (numberOfCalendars - 1));
 
   for (let i = 0; i < numberOfCalendars; i++) {
-    const month = start.month() + (distancePerCalendar * i);
+    let month;
+    if (distance <= numberOfCalendars) {
+      month = end.month() - (numberOfCalendars - (i + 1));
+    } else {
+      month = (distancePerCalendar * i);
+    }
+
+
     const carry = Math.floor(month / 12);
+    month = mod(month, 12);
+
     displayedMonths.push({
-      month: month % 12,
+      month: month,
       year: start.year() + carry,
     });
   }
@@ -91,8 +99,18 @@ export default class DatePicker extends Component {
     const { numberOfCalendars, selectionStart, selectionEnd, startDate, endDate } = this.props;
     const displayedMonths = [];
     if ((numberOfCalendars === 2) && (selectionStart !== undefined && selectionEnd !== undefined)) {
-      displayedMonths.push({ year: selectionStart.year(), month: selectionStart.month() });
-      displayedMonths.push({ year: selectionEnd.year(), month: selectionEnd.month() });
+      const startMonth = selectionStart.month();
+      const endMonth = selectionEnd.month();
+      const startYear = selectionStart.year();
+      const endYear = selectionEnd.year();
+
+
+      displayedMonths.push({ year: startYear,
+        month: (startMonth === endMonth) && (startYear === endYear)
+          ? endMonth - 1
+          : startMonth });
+      displayedMonths.push({ year: endYear,
+        month: endMonth });
     } else {
       return calcDisplayedMonths(numberOfCalendars, [startDate, endDate]);
     }

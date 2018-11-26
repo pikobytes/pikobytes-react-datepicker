@@ -67,7 +67,6 @@ export default class Calendar extends Component {
    */
   renderDayWithHandlers(day) {
     const { selectionEnd, selectionStart, temporaryEnd, temporaryStart } = this.props;
-
     // if no selection is in progress, do not render an onMouseOver handler, because it is not needed
     return selectionStart === undefined || selectionEnd !== undefined
       ? <td key={`${day.year()}.${day.month()}.${day.date()}`}
@@ -85,8 +84,7 @@ export default class Calendar extends Component {
       : <td key={`${day.year()}.${day.month()}.${day.date()}`}
         className={`day ${Calendar.determineSelection(day, temporaryEnd, temporaryStart)
           ? 'will-be-selected'
-          : ''} ${(day.isSame(temporaryEnd, 'day') || day.isSame(temporaryStart, 'day'))
-        || (day.isSame(selectionEnd, 'day') || day.isSame(selectionStart, 'day'))
+          : ''} ${(day.isSame(temporaryEnd, 'day') || day.isSame(temporaryStart, 'day')) || day.isSame(selectionStart, 'day')
           ? 'is-selected-border'
           : ''}`}
         onClick={this.selectionHandler.bind(this, day)}
