@@ -6,6 +6,7 @@ import MonthProvider from './componentmonthprovider';
 import './componentdatepicker.css';
 
 const INITDATE = '1990-02-01 00+00:00';
+const CalendarWithMonth = MonthProvider(CalendarWithNavigation);
 
 function mod(n, m) {
   return ((n % m) + m) % m;
@@ -323,24 +324,21 @@ export default class DatePicker extends Component {
     const { startDate, endDate, format } = this.props;
     return <div className="date-picker">
       {
-        displayedMonths.map((selectedMonth, index) => {
-          const CalendarWithMonth = MonthProvider(CalendarWithNavigation);
-          return <CalendarWithMonth
-            allowModification={this.isModificationAllowed.bind(this)}
-            endDate={endDate}
-            format={format}
-            hoverHandler={this.hoverHandler.bind(this)}
-            index={index}
-            key={index}
-            monthSelection={selectedMonth}
-            monthSelectionHandler={this.modifyCalendarMonth.bind(this)}
-            selectionHandler={selectionHandler.bind(this)}
-            selectionStart={drawFromState ? selectionStart : this.props.selectionStart}
-            selectionEnd={drawFromState ? selectionEnd : this.props.selectionEnd}
-            startDate={startDate}
-            temporaryStart={temporaryStart}
-            temporaryEnd={temporaryEnd} />;
-        })
+        displayedMonths.map((selectedMonth, index) => <CalendarWithMonth
+          allowModification={this.isModificationAllowed.bind(this)}
+          endDate={endDate}
+          format={format}
+          hoverHandler={this.hoverHandler.bind(this)}
+          index={index}
+          key={index}
+          monthSelection={selectedMonth}
+          monthSelectionHandler={this.modifyCalendarMonth.bind(this)}
+          selectionHandler={selectionHandler.bind(this)}
+          selectionStart={drawFromState ? selectionStart : this.props.selectionStart}
+          selectionEnd={drawFromState ? selectionEnd : this.props.selectionEnd}
+          startDate={startDate}
+          temporaryStart={temporaryStart}
+          temporaryEnd={temporaryEnd} />)
       }
     </div>;
   }

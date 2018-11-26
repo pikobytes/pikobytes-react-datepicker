@@ -3,6 +3,7 @@ import moment from 'moment';
 
 const INITDATE = '1990-02-01 00+00:00';
 
+
 /**
  * generates an array of size 7, representing a single week
  * @param {number} year - for which the week should be generated
@@ -34,10 +35,12 @@ export function buildCalendarMonth(year, month) {
   // subtract is needed for the shift from sunday to monday as first day of the week
   let startWeek = moment.utc(INITDATE).year(year).month(month)
     .startOf('month')
+    .subtract(1, 'days')
     .startOf('week')
     .week();
-  let endWeek = moment.utc().year(year).month(month).utc()
+  let endWeek = moment.utc(INITDATE).year(year).month(month)
     .endOf('month')
+    .subtract(1, 'days')
     .startOf('week')
     .week();
 
@@ -75,12 +78,36 @@ export function buildCalendarMonth(year, month) {
  */
 export default function MonthProvider(WrappedComponent) {
   return class extends Component {
+    state = { years: new Map() };
+
     render() {
       const { monthSelection, ...passThroughProps } = this.props;
       const { month, year } = monthSelection;
+      const { years } = this.state;
+
+      const selectedYear = years.get(year);
+      let selectedMonth;
+
+      if (selectedYear === undefined) {
+        const months = new Map();
+        selectedMonth = buildCalendarMonth(year, month);
+        months.set(month, selectedMonth);
+        years.set(year, months);
+        this.setState({ years: years });
+      } else {
+        selectedMonth = selectedYear.get(month);
+
+        if (selectedMonth === undefined) {
+          selectedMonth = buildCalendarMonth(year, month);
+          selectedYear.set(month, selectedMonth);
+          this.setState({ years: years });
+        }
+      }
+
+
       return <WrappedComponent {...passThroughProps}
         monthSelection={monthSelection}
-        month={buildCalendarMonth(year, month)} />;
+        month={selectedMonth} />;
     }
   };
 }
