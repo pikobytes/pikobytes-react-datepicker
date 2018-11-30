@@ -80,10 +80,10 @@ export default function MonthProvider(WrappedComponent) {
   return class extends Component {
     state = { years: new Map() };
 
-    render() {
-      const { monthSelection, ...passThroughProps } = this.props;
+    static getDerivedStateFromProps(props, state) {
+      const { monthSelection } = props;
       const { month, year } = monthSelection;
-      const { years } = this.state;
+      const { years } = state;
 
       const selectedYear = years.get(year);
       let selectedMonth;
@@ -93,21 +93,25 @@ export default function MonthProvider(WrappedComponent) {
         selectedMonth = buildCalendarMonth(year, month);
         months.set(month, selectedMonth);
         years.set(year, months);
-        this.setState({ years: years });
-      } else {
-        selectedMonth = selectedYear.get(month);
-
-        if (selectedMonth === undefined) {
-          selectedMonth = buildCalendarMonth(year, month);
-          selectedYear.set(month, selectedMonth);
-          this.setState({ years: years });
-        }
+        return ({ years: years });
       }
+      selectedMonth = selectedYear.get(month);
 
+      if (selectedMonth === undefined) {
+        selectedMonth = buildCalendarMonth(year, month);
+        selectedYear.set(month, selectedMonth);
+        return ({ years: years });
+      }
+      return null;
+    }
+
+    render() {
+      const { monthSelection, ...passThroughProps } = this.props;
+      const { years } = this.state;
 
       return <WrappedComponent {...passThroughProps}
         monthSelection={monthSelection}
-        month={selectedMonth} />;
+        month={years.get(monthSelection.year).get(monthSelection.month)} />;
     }
   };
 }

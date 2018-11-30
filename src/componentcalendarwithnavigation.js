@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import propTypes from 'prop-types';
 import moment from 'moment';
 import Calendar from './componentcalendar';
 
@@ -7,26 +7,26 @@ import './componentcalendarwithnavigation.css';
 
 export default class CalendarWithNavigation extends Component {
   static propTypes = {
-    allowModification: PropTypes.func,
-    endDate: PropTypes.object, // moment
-    format: PropTypes.string.isRequired,
-    hoverHandler: PropTypes.func,
-    index: PropTypes.number,
-    month: PropTypes.shape({
-      month: PropTypes.number.isRequired,
-      weeks: PropTypes.array.isRequired,
+    allowModification: propTypes.func,
+    endDate: propTypes.object, // moment
+    format: propTypes.string.isRequired,
+    hoverHandler: propTypes.func,
+    index: propTypes.number,
+    month: propTypes.shape({
+      month: propTypes.number.isRequired,
+      weeks: propTypes.array.isRequired,
     }).isRequired,
-    monthSelection: PropTypes.shape({
-      month: PropTypes.number.isRequired,
-      year: PropTypes.number.isRequired,
+    monthSelection: propTypes.shape({
+      month: propTypes.number.isRequired,
+      year: propTypes.number.isRequired,
     }).isRequired,
-    monthSelectionHandler: PropTypes.func,
-    selectionHandler: PropTypes.func,
-    selectionStart: PropTypes.object, // moment
-    selectionEnd: PropTypes.object, // moment
-    startDate: PropTypes.object, // moment
-    temporaryStart: PropTypes.object, // mom]ent
-    temporaryEnd: PropTypes.object, // moment
+    monthSelectionHandler: propTypes.func,
+    selectionHandler: propTypes.func,
+    selectionStart: propTypes.object, // moment
+    selectionEnd: propTypes.object, // moment
+    startDate: propTypes.object, // moment
+    temporaryStart: propTypes.object, // mom]ent
+    temporaryEnd: propTypes.object, // moment
   };
 
   // wrappers around the handlers passed in as prop to keep the this context, while still being able to bind the data to them later on

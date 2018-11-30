@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment';
 
-import DatePicker, { calcDistance } from './componentdatepicker';
+import DatePicker, { calcDistance } from './componentcalendarcontainer';
 
 describe('componendatepicker.js', () => {
   it('calculates distances correctly', () => {

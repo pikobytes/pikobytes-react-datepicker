@@ -1,21 +1,21 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import propTypes from 'prop-types';
 
 export default class Calendar extends Component {
   static propTypes = {
-    endDate: PropTypes.object, // moment
-    format: PropTypes.string,
-    hoverHandler: PropTypes.func,
-    month: PropTypes.shape({
-      month: PropTypes.number.isRequired,
-      weeks: PropTypes.array.isRequired,
+    endDate: propTypes.object, // moment
+    format: propTypes.string,
+    hoverHandler: propTypes.func,
+    month: propTypes.shape({
+      month: propTypes.number.isRequired,
+      weeks: propTypes.array.isRequired,
     }).isRequired,
-    selectionHandler: PropTypes.func,
-    selectionStart: PropTypes.object, // moment
-    selectionEnd: PropTypes.object, // moment
-    startDate: PropTypes.object, // moment
-    temporaryStart: PropTypes.object, // moment
-    temporaryEnd: PropTypes.object, // moment
+    selectionHandler: propTypes.func,
+    selectionStart: propTypes.object, // moment
+    selectionEnd: propTypes.object, // moment
+    startDate: propTypes.object, // moment
+    temporaryStart: propTypes.object, // moment
+    temporaryEnd: propTypes.object, // moment
   };
 
   // wrappers around the handlers passed in as props to keep the this contexts, while still being able to bind the dates to them later on
