@@ -25,13 +25,15 @@ export default class ExampleContainer extends Component {
   }
 
   render() {
+    const { selectionStart, selectionEnd } = this.state;
+
     return <React.Fragment> <DateRangePicker
       startDate={exampleStart}
       endDate={exampleEnd}
-      selectionStart={this.state.selectionStart}
-      selectionEnd={this.state.selectionEnd}
+      selectionStart={selectionStart}
+      selectionEnd={selectionEnd}
       reportChanges={this.reportChange.bind(this)}/>
-    <a onClick={this.onClick.bind(this)}> passNewState </a>
+    <a onClick={this.onClick.bind(this)} className="button"> passNewState </a>
     </React.Fragment>;
   }
 }

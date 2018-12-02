@@ -28,13 +28,15 @@ export class DatePicker extends Component {
 
 
   componentDidUpdate(prevProps) {
-    if (this.state.selection === undefined) {
+    const { selection } = this.state;
+
+    if (selection === undefined) {
       return;
     }
 
     if (prevProps.selection !== undefined
       && this.props.selection !== undefined
-      && !this.state.selection.isSame(this.props.selection)) {
+      && !selection.isSame(this.props.selection)) {
       this.setState({ selection: undefined, drawFromState: false, focus: true });
     }
   }
@@ -51,7 +53,11 @@ export class DatePicker extends Component {
   }
 
   render() {
-    const { drawFromState, focus, selection } = this.state;
+    const {
+      drawFromState,
+      focus,
+      selection,
+    } = this.state;
 
     return <CalendarContainer
       {...this.props}

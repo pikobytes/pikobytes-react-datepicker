@@ -129,20 +129,32 @@ export class DateRangePicker extends Component {
     this.setState({ focus: false });
   }
   render() {
-    const { numberOfCalendars } = this.props;
-    const { drawFromState, focus } = this.state;
+    const {
+      endDate,
+      numberOfCalendars,
+      startDate } = this.props;
+
+    const {
+      drawFromState,
+      focus,
+      selectionEnd,
+      selectionHandler,
+      selectionStart,
+      temporaryEnd,
+      temporaryStart } = this.state;
+
     return <CalendarContainer
-      endDate={this.props.endDate}
+      endDate={endDate}
       numberOfCalendars={numberOfCalendars}
-      drawFromState={this.state.drawFromState}
+      drawFromState={drawFromState}
       focus={focus}
       reportFocus={this.reportFocus.bind(this)}
-      selectionEnd={drawFromState ? this.state.selectionEnd : this.props.selectionEnd}
-      selectionStart={drawFromState ? this.state.selectionStart : this.props.selectionStart}
-      selectionHandler={this.state.selectionHandler.bind(this)}
-      startDate={this.props.startDate}
-      temporaryStart={this.state.temporaryStart}
-      temporaryEnd={this.state.temporaryEnd}
+      selectionEnd={drawFromState ? selectionEnd : this.props.selectionEnd}
+      selectionStart={drawFromState ? selectionStart : this.props.selectionStart}
+      selectionHandler={selectionHandler.bind(this)}
+      startDate={startDate}
+      temporaryStart={temporaryStart}
+      temporaryEnd={temporaryEnd}
       hoverHandler={this.hoverHandler.bind(this)}/>;
   }
 }

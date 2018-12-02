@@ -5,7 +5,7 @@ import CalendarWithNavigation from './componentcalendarwithnavigation';
 import MonthProvider from './componentmonthprovider';
 import './componentcalendarcontainer.css';
 
-const INITDATE = '1990-02-01 00+00:00';
+
 const CalendarWithMonth = MonthProvider(CalendarWithNavigation);
 
 /**
@@ -31,10 +31,10 @@ function mod(n, m) {
  * @returns {number} of months between the month with applied modification and its successor, 1 if adjacent months, 0 if same months
  */
 export function calcDistance(firstMonth, secondMonth) {
-  return Math.abs(moment.utc(INITDATE).year(firstMonth.year)
+  return Math.abs(moment.utc().year(firstMonth.year)
     .month(firstMonth.month)
     .utc()
-    .diff(moment.utc(INITDATE)
+    .diff(moment.utc()
       .year(secondMonth.year)
       .month(secondMonth.month), 'months', true));
 }
@@ -162,10 +162,10 @@ export default class CalendarContainer extends Component {
     let newYear = oldDisplayedMonth.year + modification.year;
 
     const compareTo = displayedMonths[index + modification.year];
-    const momentNew = moment.utc(INITDATE).year(newYear).month(newMonth);
+    const momentNew = moment.utc().year(newYear).month(newMonth);
 
     if (compareTo !== undefined) {
-      const momentCompareTo = moment.utc(INITDATE).year(compareTo.year).month(compareTo.month);
+      const momentCompareTo = moment.utc().year(compareTo.year).month(compareTo.month);
       if (modification.year === 1) {
         if (momentCompareTo.isSameOrBefore(momentNew)) {
           newYear = compareTo.year;
@@ -229,7 +229,7 @@ export default class CalendarContainer extends Component {
     const { endDate, startDate } = this.props;
     const displayedMonth = displayedMonths[index];
 
-    const momentDisplayed = moment.utc(INITDATE)
+    const momentDisplayed = moment.utc()
       .year(displayedMonth.year)
       .month(displayedMonth.month);
 
@@ -264,15 +264,17 @@ export default class CalendarContainer extends Component {
     } = this.state;
 
     const {
+      endDate,
+      format,
       hoverHandler,
       selectionStart,
       selectionEnd,
       selectionHandler,
       temporaryEnd,
       temporaryStart,
+      startDate,
     } = this.props;
 
-    const { startDate, endDate, format } = this.props;
     return <div className="date-picker">
       {
         displayedMonths.map((selectedMonth, index) => <CalendarWithMonth

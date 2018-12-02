@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 
-const INITDATE = '1990-02-01 00+00:00';
-
-
 /**
  * generates an array of size 7, representing a single week
  * @param {number} year - for which the week should be generated
@@ -12,7 +9,7 @@ const INITDATE = '1990-02-01 00+00:00';
  * @returns {moment.Moment[]} array of size 7, representing a week
  */
 export function generateDays(year, month, week) {
-  return Array(7).fill(0).map((n, i) => moment.utc(INITDATE)
+  return Array(7).fill(0).map((n, i) => moment.utc()
     .year(year)
     .month(month)
     .week(week)
@@ -33,12 +30,12 @@ export function generateDays(year, month, week) {
  */
 export function buildCalendarMonth(year, month) {
   // subtract is needed for the shift from sunday to monday as first day of the week
-  let startWeek = moment.utc(INITDATE).year(year).month(month)
+  let startWeek = moment.utc().year(year).month(month)
     .startOf('month')
     .subtract(1, 'days')
     .startOf('week')
     .week();
-  let endWeek = moment.utc(INITDATE).year(year).month(month)
+  let endWeek = moment.utc().year(year).month(month)
     .endOf('month')
     .subtract(1, 'days')
     .startOf('week')
