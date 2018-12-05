@@ -7,6 +7,7 @@ export class DatePicker extends Component {
   static propTypes = {
     endDate: propTypes.object, // moment
     format: propTypes.string,
+    id: propTypes.number,
     numberOfCalendars: propTypes.number,
     reportChanges: propTypes.func.isRequired,
     selection: propTypes.object, // moment
@@ -15,6 +16,7 @@ export class DatePicker extends Component {
 
   static defaultProps = {
     format: 'dd',
+    id: 0,
     selection: undefined,
   };
 
@@ -29,15 +31,15 @@ export class DatePicker extends Component {
 
   componentDidUpdate(prevProps) {
     const { selection } = this.state;
+    const { id } = this.props;
 
-    if (selection === undefined) {
-      return;
-    }
-
-    if (prevProps.selection !== undefined
+    if ((selection === undefined
+      && this.props.selection !== undefined) ||
+      (prevProps.selection !== undefined
       && this.props.selection !== undefined
-      && !selection.isSame(this.props.selection)) {
-      this.setState({ selection: undefined, drawFromState: false, focus: true });
+      && (!selection.isSame(this.props.selection)
+    || prevProps.id !== id))) {
+      this.setState({ selection: this.props.selection, drawFromState: false, focus: true });
     }
   }
 

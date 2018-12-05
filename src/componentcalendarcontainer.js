@@ -65,7 +65,6 @@ function calcDisplayedMonths(numberOfCalendars, timeExtent) {
       month = (distancePerCalendar * i);
     }
 
-
     const carry = Math.floor(month / 12);
     month = mod(month, 12);
 

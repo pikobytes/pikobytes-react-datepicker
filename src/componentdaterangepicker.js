@@ -8,6 +8,7 @@ export class DateRangePicker extends Component {
   static propTypes = {
     endDate: propTypes.object, // moment
     format: propTypes.string,
+    id: propTypes.number,
     numberOfCalendars: propTypes.number,
     reportChanges: propTypes.func.isRequired,
     selectionStart: propTypes.object, // moment
@@ -17,6 +18,7 @@ export class DateRangePicker extends Component {
 
   static defaultProps = {
     endDate: moment.utc('2000-06-18 00+00:00'),
+    id: 0,
     selectionStart: undefined,
     selectionEnd: undefined,
     startDate: moment.utc('1990-01-18 00+00:00'),
@@ -36,7 +38,7 @@ export class DateRangePicker extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { selectionStart, selectionEnd } = this.props;
+    const { id, selectionStart, selectionEnd } = this.props;
     // check whether a new selection is passed in as prop, if that is the case do not draw the selection stored in state
     // and reset the state
     if ((selectionStart === undefined ||
@@ -48,8 +50,11 @@ export class DateRangePicker extends Component {
 
     if ((prevProps.selectionStart === undefined && selectionStart !== undefined)
       || (prevProps.selectionEnd === undefined && selectionEnd !== undefined)
-      || (((!prevProps.selectionStart.isSame(selectionStart, 'day') && !selectionStart.isSame(this.state.selectionStart)) ||
-        (!prevProps.selectionEnd.isSame(selectionEnd, 'day') && !selectionEnd.isSame(this.state.selectionEnd))))) {
+      || prevProps.id !== id
+      || (((!prevProps.selectionStart.isSame(selectionStart, 'day')
+          && !selectionStart.isSame(this.state.selectionStart))
+        || (!prevProps.selectionEnd.isSame(selectionEnd, 'day')
+          && !selectionEnd.isSame(this.state.selectionEnd))))) {
       this.setState({
         drawFromState: false,
         focus: true,

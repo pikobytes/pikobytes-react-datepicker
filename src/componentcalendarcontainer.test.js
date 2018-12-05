@@ -6,7 +6,7 @@ import DatePicker, { calcDistance } from './componentcalendarcontainer';
 
 describe('componendatepicker.js', () => {
   it('calculates distances correctly', () => {
-    expect(calcDistance({ year: 2015, month: 0 }, { year: 2015, month: 1 })).toEqual(1);
+    expect(Math.round(calcDistance({ year: 2015, month: 0 }, { year: 2015, month: 1 }))).toEqual(1);
     expect(calcDistance({ year: 2015, month: 1 }, { year: 2015, month: 0 })).toEqual(1);
     expect(calcDistance({ year: 2014, month: 0 }, { year: 2015, month: 1 })).toEqual(13);
     expect(calcDistance({ year: 2015, month: 1 }, { year: 2014, month: 0 })).toEqual(13);
