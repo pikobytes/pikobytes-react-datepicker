@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 
-import moment, { isMoment } from 'moment';
+import moment, { isMoment } from 'moment-mini';
 import { DateRangePicker } from './componentdaterangepicker';
 import { DatePicker } from './componentdatepicker';
 
 const exampleStart = moment('2000-01-31 00+00:00');
-const exampleEnd = moment('2003-12-11 00+00:00');
+const exampleEnd = moment('2000-12-11 00+00:00');
 
 export default class ExampleContainer extends Component {
   state = { selectionStart: moment.utc('2001-01-01 00+00:00'),
@@ -31,7 +31,7 @@ export default class ExampleContainer extends Component {
   render() {
     const { selection, selectionStart, selectionEnd } = this.state;
 
-    return <React.Fragment> <DatePicker
+    return <React.Fragment> <DateRangePicker
       startDate={exampleStart}
       endDate={exampleEnd}
       id={this.state.id}

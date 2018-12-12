@@ -5,3 +5,11 @@ package-lock.json
 dist/
 build/
 **/*.css
+.babelrc
+.editorconfig
+.npmignore
+.travis.yml
+coverage/
+rollup.config.js
+src/.eslintrc
+

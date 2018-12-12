@@ -33,12 +33,9 @@ export class DatePicker extends Component {
     const { selection } = this.state;
     const { id } = this.props;
 
-    if ((selection === undefined
-      && this.props.selection !== undefined) ||
-      (prevProps.selection !== undefined
-      && this.props.selection !== undefined
-      && (!selection.isSame(this.props.selection)
-    || prevProps.id !== id))) {
+    if ((selection === undefined && this.props.selection !== undefined)
+      || (prevProps.selection !== undefined && this.props.selection !== undefined && (!selection.isSame(this.props.selection)
+      || prevProps.id !== id))) {
       this.setState({ selection: this.props.selection, drawFromState: false, focus: true });
     }
   }
@@ -46,7 +43,6 @@ export class DatePicker extends Component {
   selectionHandler(date) {
     const { reportChanges } = this.props;
     this.setState({ selection: date, drawFromState: true });
-
     reportChanges(date);
   }
 

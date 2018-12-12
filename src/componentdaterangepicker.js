@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import moment from 'moment';
+import moment from 'moment-mini';
 import propTypes from 'prop-types';
 
 import CalendarContainer from './componentcalendarcontainer';
@@ -39,8 +39,7 @@ export class DateRangePicker extends Component {
 
   componentDidUpdate(prevProps) {
     const { id, selectionStart, selectionEnd } = this.props;
-    // check whether a new selection is passed in as prop, if that is the case do not draw the selection stored in state
-    // and reset the state
+
     if ((selectionStart === undefined ||
       selectionEnd === undefined)
     || (prevProps.selectionStart === undefined &&
@@ -48,9 +47,9 @@ export class DateRangePicker extends Component {
       return;
     }
 
-    if ((prevProps.selectionStart === undefined && selectionStart !== undefined)
-      || (prevProps.selectionEnd === undefined && selectionEnd !== undefined)
-      || prevProps.id !== id
+    // check whether a new selection is passed in as prop, if that is the case do not draw the selection stored in state
+    // and reset the state
+    if (prevProps.id !== id
       || (((!prevProps.selectionStart.isSame(selectionStart, 'day')
           && !selectionStart.isSame(this.state.selectionStart))
         || (!prevProps.selectionEnd.isSame(selectionEnd, 'day')

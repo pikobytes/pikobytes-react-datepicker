@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import moment from 'moment';
+import moment from 'moment-mini';
 import propTypes from 'prop-types';
 import CalendarWithNavigation from './componentcalendarwithnavigation';
 import MonthProvider from './componentmonthprovider';
@@ -124,7 +124,8 @@ export default class CalendarContainer extends Component {
       return displayedMonths;
     }
 
-    if ((numberOfCalendars === 2) && (selectionStart !== undefined && selectionEnd !== undefined)) {
+    if (((numberOfCalendars === 2) && (selectionStart !== undefined && selectionEnd !== undefined))
+      && !(selectionEnd.isBefore(startDate) || selectionStart.isAfter(endDate))) {
       const startMonth = selectionStart.month();
       const endMonth = selectionEnd.month();
       const startYear = selectionStart.year();

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import propTypes from 'prop-types';
-import moment from 'moment';
+import moment from 'moment-mini';
 import Calendar from './componentcalendar';
 
 import './componentcalendarwithnavigation.css';

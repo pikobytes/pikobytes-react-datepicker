@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import moment from 'moment';
+import moment from 'moment-mini';
 
 /**
  * generates an array of size 7, representing a single week

@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import moment from 'moment';
+import moment from 'moment-mini';
 
 import DatePicker, { calcDistance } from './componentcalendarcontainer';
 
