@@ -5,7 +5,12 @@
   > .modification-row{
     display: flex;
     justify-content: space-between;
+    align-items: baseline;
   }
+}
+
+.modification-row > p{
+  display: flex;
 }
 
 .calendar-container{

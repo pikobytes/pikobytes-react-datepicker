@@ -43,7 +43,9 @@ export class DatePicker extends Component {
   selectionHandler(date) {
     const { reportChanges } = this.props;
     this.setState({ selection: date, drawFromState: true });
-    reportChanges(date);
+    if (reportChanges !== undefined) {
+      reportChanges(date);
+    }
   }
 
   reportFocus() {
