@@ -30,13 +30,14 @@ export class DatePicker extends Component {
 
 
   componentDidUpdate(prevProps) {
-    const { selection } = this.state;
+    const oldSelection = this.state.selection;
     const { id } = this.props;
+    const newSelection = this.props.selection;
 
-    if ((selection === undefined && this.props.selection !== undefined)
-      || (prevProps.selection !== undefined && this.props.selection !== undefined && (!selection.isSame(this.props.selection)
-      || prevProps.id !== id))) {
-      this.setState({ selection: this.props.selection, drawFromState: false, focus: true });
+    if ((oldSelection === undefined && newSelection !== undefined)
+      || (prevProps.selection !== undefined && newSelection !== undefined
+        && (!oldSelection.isSame(newSelection) || prevProps.id !== id))) {
+      this.setState({ selection: newSelection, drawFromState: false, focus: true });
     }
   }
 

@@ -31,12 +31,12 @@ function mod(n, m) {
  * @returns {number} of months between the month with applied modification and its successor, 1 if adjacent months, 0 if same months
  */
 export function calcDistance(firstMonth, secondMonth) {
-  return Math.abs(moment.utc().year(firstMonth.year)
+  return Math.floor(Math.abs(moment.utc().year(firstMonth.year)
     .month(firstMonth.month)
     .utc()
     .diff(moment.utc()
       .year(secondMonth.year)
-      .month(secondMonth.month), 'months', true));
+      .month(secondMonth.month), 'months', true)));
 }
 
 /**
@@ -161,22 +161,19 @@ export default class CalendarContainer extends Component {
     let newMonth = oldDisplayedMonth.month + modification.month;
     let newYear = oldDisplayedMonth.year + modification.year;
 
-    const compareTo = displayedMonths[index + modification.year];
+    const modificationValue = modification.month + modification.year;
+
+    const compareTo = displayedMonths[index + modificationValue];
     const momentNew = moment.utc().year(newYear).month(newMonth);
 
+    // when there is another month, with which the new month might collide check if the new month really collides with it
     if (compareTo !== undefined) {
       const momentCompareTo = moment.utc().year(compareTo.year).month(compareTo.month);
-      if (modification.year === 1) {
-        if (momentCompareTo.isSameOrBefore(momentNew)) {
-          newYear = compareTo.year;
-          newMonth = compareTo.month - 1;
-        }
-      }
-      if (modification.year === -1) {
-        if (momentCompareTo.isSameOrAfter(momentNew)) {
-          newYear = compareTo.year;
-          newMonth = compareTo.month + 1;
-        }
+
+      if ((momentCompareTo.isSameOrBefore(momentNew, 'month') && modificationValue > 0)
+        || (momentCompareTo.isSameOrAfter(momentNew, 'month') && modificationValue < 0)) {
+        newYear = compareTo.year;
+        newMonth = compareTo.month - modification.year;
       }
     } else {
       if (momentNew.isBefore(startDate, 'month')) {
@@ -190,26 +187,13 @@ export default class CalendarContainer extends Component {
       }
     }
 
-
-    if (newMonth < 0) {
-      newMonth = 11;
-      --newYear;
-    }
-
-    if (newMonth > 11) {
-      newMonth = 0;
-      ++newYear;
-    }
-
-    const newDisplayedMonth = {
-      month: newMonth,
-      year: newYear,
-    };
-
-
     // clone the array, before inserting
     const newDisplayedMonths = displayedMonths.slice(0);
-    newDisplayedMonths[index] = newDisplayedMonth;
+    newDisplayedMonths[index] = {
+      month: mod(newMonth, 12),
+      year: newYear + Math.floor(newMonth / 12),
+    };
+
     this.setState({
       displayedMonths: newDisplayedMonths,
     });
@@ -233,19 +217,20 @@ export default class CalendarContainer extends Component {
       .year(displayedMonth.year)
       .month(displayedMonth.month);
 
-    // for modifications forwards in time check the successor or the endDate of the range, when there is no successor
-    if (modification.year > 0 || modification.month > 0) {
-      if (index >= displayedMonths.length - 1) {
-        return endDate.isAfter(momentDisplayed, 'month');
-      }
-      return calcDistance(displayedMonth, displayedMonths[index + 1]) > 1;
+    const modificationValue = modification.month + modification.year;
+    // for modifications of the last month in array forwards in time check the the endDate of the range
+
+    if (index >= displayedMonths.length - 1 && modificationValue > 0) {
+      return endDate.isAfter(momentDisplayed, 'month');
     }
 
-    // for modifications backwards in time check the predecessor or the startDate of the range, when there is no predecessor
-    if (index === 0) {
+    // for modifications of the first month in array backwards in time check the the startDate of the range
+    if (index === 0 && modificationValue < 0) {
       return startDate.isBefore(momentDisplayed, 'month');
     }
-    return calcDistance(displayedMonth, displayedMonths[index - 1]) > 1;
+
+    // else check the distance to the corresponding neighbour
+    return calcDistance(displayedMonth, displayedMonths[index + modificationValue]) > 1;
   }
 
 
