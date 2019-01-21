@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import moment from 'moment-mini';
+import moment from 'moment';
 import propTypes from 'prop-types';
 
 import CalendarContainer from './componentcalendarcontainer';

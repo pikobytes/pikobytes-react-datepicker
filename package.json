@@ -1,6 +1,6 @@
 {
   "name": "pikobytes-react-datepicker",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "React date picker",
   "main": "index.js",
   "license": "MIT",
@@ -53,10 +53,12 @@
     "rollup-plugin-uglify": "^6.0.0"
   },
   "dependencies": {
-    "bulma": "^0.7.1",
-    "moment-mini": "^2.22.1",
-    "prop-types": "^15.6.1",
+    "bulma": "^0.7.1"
+  },
+  "peerDependencies": {
+    "moment": "^2.23.0",
     "react": "^16.4.1",
-    "react-dom": "^16.4.1"
+    "react-dom": "^16.4.1",
+    "prop-types": "^15.6.1"
   }
 }

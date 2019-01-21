@@ -1,7 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import moment from 'moment-mini';
+import moment from 'moment';
 import { buildCalendarMonth } from './componentmonthprovider';
 
 import CalendarWithNavigation from './componentcalendarwithnavigation';

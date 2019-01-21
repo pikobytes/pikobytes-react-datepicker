@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import moment, { isMoment } from 'moment-mini';
+import moment, { isMoment } from 'moment';
 import { DateRangePicker } from './componentdaterangepicker';
 import { DatePicker } from './componentdatepicker';
 
