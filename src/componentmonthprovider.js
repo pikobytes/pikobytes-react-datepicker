@@ -15,6 +15,8 @@ export function generateDays(year, month, week) {
     .week(week)
     .utc()
     .startOf('week')
+    .hour(12)
+    .startOf('hour')
     .clone()
     .add(n + (i + 1), 'day'));
 }

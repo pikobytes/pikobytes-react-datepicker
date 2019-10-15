@@ -106,7 +106,7 @@ export class DateRangePicker extends Component {
     if (date.isBefore(selectionStart, 'day')) {
       newState.selectionStart = date.clone();
       newState.selectionEnd = selectionStart;
-    } else if (date.isSame(selectionStart, 'day')) {
+    } else if (date.isSame(selectionStart, 'day') && temporaryEnd !== undefined) {
       newState.selectionStart = temporaryEnd.isBefore(date, 'day') ? temporaryEnd : date;
       newState.selectionEnd = temporaryEnd.isAfter(date, 'day') ? temporaryEnd : date;
     } else {
