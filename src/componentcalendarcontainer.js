@@ -241,9 +241,9 @@ export default class CalendarContainer extends Component {
     if (selectionStart === undefined || selectionEnd === undefined) return;
 
     if (focus && (
-      (selectionStart.month() > displayedMonths[0].month || selectionStart.year() > displayedMonths[0].year)
-        || (selectionEnd.month() > displayedMonths[displayedMonths.length - 1].month)
-        || selectionEnd.year > displayedMonths[displayedMonths.length - 1].year)
+      (selectionStart.month() !== displayedMonths[0].month || selectionStart.year() !== displayedMonths[0].year)
+        || (selectionEnd.month() !== displayedMonths[displayedMonths.length - 1].month)
+        || selectionEnd.year !== displayedMonths[displayedMonths.length - 1].year)
     ) {
       this.setState({ displayedMonths: this.determineFocus() });
       reportFocus();
