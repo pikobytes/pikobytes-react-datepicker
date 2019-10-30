@@ -3,7 +3,9 @@
   "version": "1.0.14",
   "description": "React date picker",
   "main": "dist/main.js",
-  "files": [ "dist/" ],
+  "files": [
+    "dist/"
+  ],
   "license": "MIT",
   "scripts": {
     "build-css": "node-sass-chokidar src/ -o src/",
@@ -49,11 +51,6 @@
     "npm-run-all": "^4.1.2",
     "react-scripts": "1.1.4",
     "redux-mock-store": "^1.5.1",
-    "rollup": "^0.67.3",
-    "rollup-plugin-babel": "^4.0.3",
-    "rollup-plugin-node-resolve": "^3.4.0",
-    "rollup-plugin-postcss": "^1.6.3",
-    "rollup-plugin-uglify": "^6.0.0",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9"
   },
