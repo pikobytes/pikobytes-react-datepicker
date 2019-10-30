@@ -5,7 +5,6 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './componentapp';
 
-
 const APP_CONTAINER_ID = 'app-container';
 
 

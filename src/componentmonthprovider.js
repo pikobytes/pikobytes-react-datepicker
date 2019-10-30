@@ -9,12 +9,11 @@ import moment from 'moment';
  * @returns {moment.Moment[]} array of size 7, representing a week
  */
 export function generateDays(year, month, week) {
-  return Array(7).fill(0).map((n, i) => moment.utc()
-    .year(year)
-    .month(month)
+  return Array(7).fill(0).map((n, i) => moment.utc(`${year}-${month + 1}`, 'YYYY-M')
     .week(week)
-    .utc()
     .startOf('week')
+    .hour(12)
+    .startOf('hour')
     .clone()
     .add(n + (i + 1), 'day'));
 }
@@ -30,12 +29,12 @@ export function generateDays(year, month, week) {
  */
 export function buildCalendarMonth(year, month) {
   // subtract is needed for the shift from sunday to monday as first day of the week
-  let startWeek = moment.utc().year(year).month(month)
+  let startWeek = moment.utc(`${year}-${month + 1}`, 'YYYY-M')
     .startOf('month')
     .subtract(1, 'days')
     .startOf('week')
     .week();
-  let endWeek = moment.utc().year(year).month(month)
+  let endWeek = moment.utc(`${year}-${month + 1}`, 'YYYY-M')
     .endOf('month')
     .subtract(1, 'days')
     .startOf('week')
@@ -54,7 +53,6 @@ export function buildCalendarMonth(year, month) {
   if (endWeek === 1) {
     endWeek = 53;
   }
-
   for (let week = startWeek; week <= endWeek; week++) {
     weeks.push({
       week: week,

@@ -70,10 +70,10 @@ export class DateRangePicker extends Component {
   selectionStartHandler(date) {
     const newState = {
       drawFromState: true,
-      selectionStart: date,
+      selectionStart: date.clone(),
       selectionEnd: undefined,
       selectionHandler: this.selectionEndHandler,
-      temporaryStart: date,
+      temporaryStart: date.clone(),
     };
 
     const { reportChanges } = this.props;
@@ -92,7 +92,7 @@ export class DateRangePicker extends Component {
    * @param {moment} date which should be selected as endDate
    */
   selectionEndHandler(date) {
-    const { selectionStart } = this.state;
+    const { selectionStart, temporaryEnd } = this.state;
 
     const { reportChanges } = this.props;
 
@@ -103,12 +103,15 @@ export class DateRangePicker extends Component {
       temporaryStart: undefined,
     };
 
-    if (date.isBefore(selectionStart)) {
-      newState.selectionStart = date;
+    if (date.isBefore(selectionStart, 'day')) {
+      newState.selectionStart = date.clone();
       newState.selectionEnd = selectionStart;
+    } else if (date.isSame(selectionStart, 'day') && temporaryEnd !== undefined) {
+      newState.selectionStart = temporaryEnd.isBefore(date, 'day') ? temporaryEnd : date;
+      newState.selectionEnd = temporaryEnd.isAfter(date, 'day') ? temporaryEnd : date;
     } else {
       newState.selectionStart = selectionStart;
-      newState.selectionEnd = date;
+      newState.selectionEnd = date.clone();
     }
 
     this.setState(newState);
